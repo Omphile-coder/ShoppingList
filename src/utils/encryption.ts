@@ -3,7 +3,7 @@ import CryptoJS from "crypto-js";
 
 const SECRET_KEY = "shopping-list-secret-key";
 
-export const encrptionData = (data: string): string => { 
+export const encryptData = (data: string): string => { 
     return CryptoJS.AES.encrypt(data, SECRET_KEY).toString();
 }
 
