@@ -1,6 +1,23 @@
 {
-    "users": [],
-    "shoppingLists": [],
-    "shoppingItems":[]
-
+  "users": [
+    {
+      "name": "Omphile",
+      "surname": "Lucas",
+      "email": "lucasomphile23@gmail.com",
+      "cellNumber": "0787894839",
+      "password": "U2FsdGVkX19g1eh5Pr6tfriQgsiFURAAaANVFxWklk4=",
+      "id": "hMznP8Zr5JA"
+    },
+    {
+      "name": "Dimpho",
+      "surname": "Lucas",
+      "email": "lucas@gmail.com",
+      "cellNumber": "0787894839",
+      "password": "U2FsdGVkX19fEUrRTOdpMbh5FrARunwsu6H3wuq7ubc=",
+      "id": "bt-9xr-Ojis"
+    }
+  ],
+  "shoppingLists": [],
+  "shoppingItems": [],
+  "$schema": "./node_modules/json-server/schema.json"
 }

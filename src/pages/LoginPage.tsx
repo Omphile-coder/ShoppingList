@@ -1,8 +1,85 @@
+import { Link, useNavigate } from "react-router-dom";
+import { useAppDispatch } from "../store/hooks";
+import { useState } from "react";
+import { getUserByEmail } from "../services/authService";
+import { decryptData } from "../utils/encryption";
+import { login } from "../features/auth/authSlice";
+
 export const LoginPage = () => {
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+
+    try {
+      //   Fetch the user from the database
+      const user = await getUserByEmail(email);
+
+      if (!user) {
+        setError("Invalid email or password.");
+        return;
+      }
+      //   Decrypt the password stored in the database
+      const decryptedPassword = decryptData(user.password);
+
+      //   Compare the encrypted password to what the user just typed
+      if (decryptedPassword !== password) {
+        setError("Invalid email or password.");
+        return;
+      }
+
+      //   If they match, tell Redux that the user is logged in!
+
+      const { password: _, ...safeUser } = user;
+      dispatch(login(safeUser));
+
+      //   Go back to the homepage
+      navigate("/");
+    } catch (err) {
+      console.error("Login error:", err);
+      setError("Something went wrong while logging in.");
+    }
+  };
+
   return (
-    <div>
-      <h1>Login Page</h1>
-      <p>This whereour sleek mobile-style login will go.</p>
-    </div>
+    <main className="auth-container">
+      <h1>Welcome Back</h1>
+
+      {error && <p className="alert-error">{error}</p>}
+
+      <form onSubmit={handleSubmit} className="auth-form">
+        <input
+          type="email"
+          placeholder="Email"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="auth-input"
+        />
+
+        <input
+          type="password"
+          placeholder="Password"
+          required
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="auth-input"
+        />
+
+        <button type="submit" className="auth-button">
+          Log In
+        </button>
+      </form>
+
+      <p className="auth-footer">
+        Don't have an account? <Link to="/register">Sign up here</Link>
+      </p>
+    </main>
   );
 };
