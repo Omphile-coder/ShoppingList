@@ -3,10 +3,14 @@ import { useAppDispatch, useAppSelector } from "../store/hooks";
 import {
   setLists,
   addList,
+  updateList,
+  deleteList,
 } from "../features/shoppingLists/shoppingListsSlice";
 import {
   getShoppingLists,
   createShopppingList,
+  updateShoppingList,
+  deleteShoppingList,
 } from "../services/shoppingListService";
 
 const HomePage = () => {
@@ -15,6 +19,8 @@ const HomePage = () => {
   const lists = useAppSelector((state) => state.shoppingLists.lists);
 
   const [newListName, setNewListName] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingName, setEditingName] = useState("");
 
   // Fetch lists when the page loads
   useEffect(() => {
@@ -36,22 +42,46 @@ const HomePage = () => {
         dateAdded: new Date().toISOString(),
       });
 
-      dispatch(addList(newList)); // Update Redux so the UI refreshes instantly
-      setNewListName(""); // Clear the input
+      dispatch(addList(newList));
+      setNewListName("");
     } catch (error) {
       console.error("Failed to create list", error);
     }
   };
 
-  return (
-    <main style={{ maxWidth: "800px", margin: "40px auto", padding: "20px" }}>
-      <h1>My Shopping Lists</h1>
-      <p>Welcome back, {currentUser?.name}!</p>
+  const handleUpdate = async (id: string) => {
+    if (!editingName.trim()) {
+      return;
+    }
+    try {
+      const updated = await updateShoppingList(id, {
+        name: editingName,
+      });
 
-      <form
-        onSubmit={handleCreateList}
-        style={{ display: "flex", gap: "10px", margin: "20px 0" }}
-      >
+      dispatch(updateList(updated));
+      setEditingId(null);
+    } catch (error) {
+      console.error("failed to updae list", error);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm("Are you sure you want to delete this list?")) return;
+    try {
+      await deleteShoppingList(id);
+      dispatch(deleteList(id));
+    } catch (error) {
+      console.error("Failed to delete list", error);
+    }
+  };
+  return (
+    <main className="dashboard-container">
+      <div className="dashboard-header">
+        <h1>My Shopping Lists</h1>
+        <p>Welcome back, {currentUser?.name}!</p>
+      </div>
+
+      <form onSubmit={handleCreateList} className="add-list-form">
         <input
           type="text"
           placeholder="New list name (e.g., Groceries)"
@@ -59,29 +89,66 @@ const HomePage = () => {
           onChange={(e) => setNewListName(e.target.value)}
           className="auth-input"
         />
-        <button type="submit" className="auth-button" style={{ marginTop: 0 }}>
+        <button type="submit" className="add-list-button">
           Add List
         </button>
       </form>
 
-      <div style={{ display: "grid", gap: "16px" }}>
+      <div className="lists-grid">
         {lists.length === 0 ? (
-          <p>You don't have any lists yet. Create one above!</p>
+          <p>You don't have any lists yet.</p>
         ) : (
           lists.map((list) => (
-            <div
-              key={list.id}
-              style={{
-                padding: "20px",
-                background: "white",
-                borderRadius: "8px",
-                boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
-              }}
-            >
-              <h3>{list.name}</h3>
-              <p style={{ fontSize: "0.85rem", color: "gray" }}>
-                Created: {new Date(list.dateAdded).toLocaleDateString()}
-              </p>
+            <div key={list.id} className="list-card">
+              {editingId === list.id ? (
+                <div>
+                  <input
+                    type="text"
+                    value={editingName}
+                    onChange={(e) => setEditingName(e.target.value)}
+                    className="edit-input"
+                    autoFocus
+                  />
+                  <div className="card-actions">
+                    <button
+                      onClick={() => handleUpdate(list.id)}
+                      className="action-btn edit-btn"
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={() => setEditingId(null)}
+                      className="action-btn delete-btn"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <h3>{list.name}</h3>
+                  <p className="list-card-date">
+                    Created: {new Date(list.dateAdded).toLocaleDateString()}
+                  </p>
+                  <div className="card-actions">
+                    <button
+                      onClick={() => {
+                        setEditingId(list.id);
+                        setEditingName(list.name);
+                      }}
+                      className="action-btn edit-btn"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(list.id)}
+                      className="action-btn delete-btn"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           ))
         )}

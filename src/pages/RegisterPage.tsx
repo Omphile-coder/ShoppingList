@@ -1,16 +1,20 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { getUserByEmail, registerUser } from "../services/authService";
+import {
+  getUserByEmail,
+  registerUser,
+  type RegisterData,
+} from "../services/authService";
 
 export const RegisterPage = () => {
   const navigate = useNavigate();
 
   // State to hold our form inputs
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<RegisterData>({
     name: "",
     surname: "",
     email: "",
-    cellNumber: "",
+    cellnumber: "",
     password: "",
   });
 

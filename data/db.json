@@ -15,16 +15,17 @@
       "cellNumber": "0787894839",
       "password": "U2FsdGVkX19fEUrRTOdpMbh5FrARunwsu6H3wuq7ubc=",
       "id": "bt-9xr-Ojis"
-    }
-  ],
-  "shoppingLists": [
+    },
     {
-      "name": "Sneaker",
-      "userId": "bt-9xr-Ojis",
-      "dateAdded": "2026-08-25T22:55:32.739Z",
-      "id": "ZUipF9jhRHk"
+      "name": "Itashi",
+      "surname": "yoshi",
+      "email": "yoshi@gmail.com",
+      "cellNumber": "0796349136",
+      "password": "U2FsdGVkX1/y/3JCp0eAllVZxGAs4R+kPW5RgR7ZtZ4=",
+      "id": "J5Yer66Afs0"
     }
   ],
+  "shoppingLists": [],
   "shoppingItems": [],
   "$schema": "./node_modules/json-server/schema.json"
 }

@@ -2,8 +2,8 @@
    GLOBAL VARIABLES
  */
 :root {
-  --primary-color: #2563eb;
-  --primary-hover: #1d4ed8;
+  --primary-color: #262626;
+  --primary-hover: #464545;
   --bg-color: #f8f9fa;
   --text-main: #1f2937;
   --text-light: #6b7280;
@@ -176,4 +176,52 @@ HOME PAGE
 .list-card-date {
   font-size: 0.85rem;
   color: var(--text-light);
+}
+
+/* 
+   CARD ACTIONS
+ */
+.card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-color);
+}
+
+.action-btn {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.edit-btn {
+  background-color: #e5e7eb;
+  color: var(--text-main);
+}
+
+.edit-btn:hover {
+  background-color: #d1d5db;
+}
+
+.delete-btn {
+  background-color: #fee2e2;
+  color: var(--error-color);
+}
+
+.delete-btn:hover {
+  background-color: #fca5a5;
+  color: #991b1b;
+}
+
+.edit-input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 8px;
+  border: 1px solid var(--primary-color);
+  border-radius: 6px;
 }

@@ -3,7 +3,7 @@ import PublicRoute from "../components/PublicRoute";
 import { LoginPage } from "../pages/LoginPage";
 import { RegisterPage } from "../pages/RegisterPage";
 import { ProtectedRoute } from "../components/ProtectedRoute";
-import { HomePage } from "../pages/HomePage";
+import HomePage from "../pages/HomePage";
 
 const AppRoutes = () => {
   return (

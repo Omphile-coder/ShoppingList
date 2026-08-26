@@ -21,4 +21,15 @@ export const getShoppingLists = async (userId: string) => {
 export const createShopppingList = async (listData: Omit<ShoppingList, "id">) => {
     const response = await api.post<ShoppingList>("/shoppingLists", listData);
     return response.data;
- }
+}
+ 
+// Update an existing list
+export const updateShoppingList = async (id: string, listData: Partial<ShoppingList>): Promise<ShoppingList> => { 
+    const response = await api.patch<ShoppingList>(`/shoppingLists/${id}`, listData);
+    return response as unknown as ShoppingList
+}
+
+// Delete a list
+export const deleteShoppingList = async (id: string) => { 
+  await api.delete(`/shoppingLists/${id}`);
+}
