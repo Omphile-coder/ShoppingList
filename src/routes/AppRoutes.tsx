@@ -4,6 +4,7 @@ import { LoginPage } from "../pages/LoginPage";
 import { RegisterPage } from "../pages/RegisterPage";
 import { ProtectedRoute } from "../components/ProtectedRoute";
 import HomePage from "../pages/HomePage";
+import { ShoppingListDetails } from "../pages/ShoppingListDetails";
 
 const AppRoutes = () => {
   return (
@@ -17,6 +18,7 @@ const AppRoutes = () => {
       {/* Protected routes - only visible if logged in */}
       <Route element={<ProtectedRoute />}>
         <Route path="/" element={<HomePage />} />
+        <Route path="/lists/:listId" element={<ShoppingListDetails />} />
       </Route>
     </Routes>
   );

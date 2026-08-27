@@ -12,6 +12,7 @@ import {
   updateShoppingList,
   deleteShoppingList,
 } from "../services/shoppingListService";
+import { Link } from "react-router-dom";
 
 const HomePage = () => {
   const dispatch = useAppDispatch();
@@ -131,6 +132,12 @@ const HomePage = () => {
                     Created: {new Date(list.dateAdded).toLocaleDateString()}
                   </p>
                   <div className="card-actions">
+                    <Link
+                      to={`/lists/${list.id}`}
+                      className="action-btn btn-primary"
+                    >
+                      View Items
+                    </Link>
                     <button
                       onClick={() => {
                         setEditingId(list.id);

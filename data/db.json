@@ -25,7 +25,23 @@
       "id": "J5Yer66Afs0"
     }
   ],
-  "shoppingLists": [],
-  "shoppingItems": [],
+  "shoppingLists": [
+    {
+      "name": "fewrvda",
+      "userId": "bt-9xr-Ojis",
+      "dateAdded": "2026-08-26T21:00:28.003Z",
+      "id": "I67Owb_Xa48"
+    }
+  ],
+  "shoppingItems": [
+    {
+      "listId": "I67Owb_Xa48",
+      "name": "ewfwef",
+      "quantity": 1,
+      "category": "Groceries",
+      "dateAdded": "2026-08-26T21:00:44.453Z",
+      "id": "90Jj9vhQuQE"
+    }
+  ],
   "$schema": "./node_modules/json-server/schema.json"
 }

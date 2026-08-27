@@ -225,3 +225,103 @@ HOME PAGE
   border: 1px solid var(--primary-color);
   border-radius: 6px;
 }
+
+/* 
+   SHOPPING LIST DETAILS PAGE
+ */
+.back-link {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 600;
+  display: inline-block;
+  margin-bottom: 16px;
+  transition: color 0.2s ease;
+}
+
+.back-link:hover {
+  color: var(--primary-hover);
+  text-decoration: underline;
+}
+
+.item-form-container {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 32px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.item-form-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.input-small {
+  width: 100px;
+}
+
+/* Modifier for list cards to display items in a row */
+.list-card-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.item-title {
+  margin: 0;
+  color: var(--text-main);
+}
+
+.item-quantity {
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: var(--primary-color);
+  background: var(--bg-color);
+  padding: 4px 12px;
+  border-radius: 50px;
+}
+
+/* Reusable primary button for Links (used in HomePage) */
+.btn-primary {
+  background-color: var(--primary-color);
+  color: white;
+  text-decoration: none;
+  text-align: center;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+}
+
+/* 
+   SEARCH & SORT CONTROLS
+ */
+.controls-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+  background: white;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  align-items: center;
+}
+
+.search-input {
+  flex: 1;
+  min-width: 200px;
+}
+
+.sort-select {
+  min-width: 150px;
+}
+
+.control-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-right: 8px;
+}
