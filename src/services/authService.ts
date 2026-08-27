@@ -38,4 +38,10 @@ export const getUserByEmail = async (email: string) => {
 
     // JSON Server returns an array, If we find a user then we take the first one
     return response.data.length > 0 ? response.data[0] : null;
+}
+ 
+// Update user data (using PATCH to only update specific fields)
+export const updateUser = async (id: string, userData: Partial<RegisterData>) => {
+    const response = await api.patch(`/users/${id}`, userData);
+    return response.data;
  }
