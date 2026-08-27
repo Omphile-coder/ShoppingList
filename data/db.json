@@ -31,6 +31,12 @@
       "userId": "bt-9xr-Ojis",
       "dateAdded": "2026-08-26T21:00:28.003Z",
       "id": "I67Owb_Xa48"
+    },
+    {
+      "name": "Groceries",
+      "userId": "bt-9xr-Ojis",
+      "dateAdded": "2026-08-27T12:42:44.296Z",
+      "id": "fjO6oReY5Pc"
     }
   ],
   "shoppingItems": [
@@ -41,6 +47,14 @@
       "category": "Groceries",
       "dateAdded": "2026-08-26T21:00:44.453Z",
       "id": "90Jj9vhQuQE"
+    },
+    {
+      "listId": "fjO6oReY5Pc",
+      "name": "Milk",
+      "quantity": 1,
+      "category": "Groceries",
+      "dateAdded": "2026-08-27T12:43:01.395Z",
+      "id": "ghQUPhfArSY"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"

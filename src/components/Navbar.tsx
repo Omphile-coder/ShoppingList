@@ -20,10 +20,10 @@ export const Navbar = () => {
       </Link>
 
       <div className="nav-links">
-        <Link to="/" className="nav-brand">
+        <Link to="/" className="nav-link">
           Dashboard
         </Link>
-        <Link to="/" className="nav-brand">
+        <Link to="/profile" className="nav-link">
           Profile
         </Link>
         <button onClick={handleLogout} className="logout-btn">

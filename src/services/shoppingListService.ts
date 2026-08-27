@@ -26,7 +26,7 @@ export const createShopppingList = async (listData: Omit<ShoppingList, "id">) =>
 // Update an existing list
 export const updateShoppingList = async (id: string, listData: Partial<ShoppingList>): Promise<ShoppingList> => { 
     const response = await api.patch<ShoppingList>(`/shoppingLists/${id}`, listData);
-    return response as unknown as ShoppingList
+    return response.data;
 }
 
 // Delete a list

@@ -5,6 +5,7 @@ import { RegisterPage } from "../pages/RegisterPage";
 import { ProtectedRoute } from "../components/ProtectedRoute";
 import HomePage from "../pages/HomePage";
 import { ShoppingListDetails } from "../pages/ShoppingListDetails";
+import { ProfilePage } from "../pages/ProfilePage";
 
 const AppRoutes = () => {
   return (
@@ -19,6 +20,7 @@ const AppRoutes = () => {
       <Route element={<ProtectedRoute />}>
         <Route path="/" element={<HomePage />} />
         <Route path="/lists/:listId" element={<ShoppingListDetails />} />
+        <Route path="/profile" element={<ProfilePage />} />
       </Route>
     </Routes>
   );

@@ -28,7 +28,7 @@ const shoppingListSlice = createSlice({
     // editing a shopping list
     updateList: (state, action: PayloadAction<ShoppingList>) => {
       const index = state.lists.findIndex((list) => list.id === action.payload.id);
-      if (index !== 1) {
+      if (index !== -1) {
         state.lists[index] = action.payload;
        }
     },
@@ -44,7 +44,7 @@ const shoppingListSlice = createSlice({
 
 // Update an existing list
 export const updateShoppingList = async (id: string, listData: Partial<ShoppingList>) => { 
-  const response = await api.patch<ShoppingList>(`/shoppingLsts/${id}`, listData);
+  const response = await api.patch<ShoppingList>(`/shoppingLists/${id}`, listData);
 }
 
 // Delete a list
