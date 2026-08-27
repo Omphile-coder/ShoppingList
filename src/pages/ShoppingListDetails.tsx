@@ -3,9 +3,16 @@ import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { useEffect, useMemo, useState } from "react";
 import {
   createShoppingItem,
+  deleteShoppingItem,
   getShoppingItems,
+  updateShoppingItem,
 } from "../services/shoppingItemService";
-import { addItem, setItems } from "../features/shoppingLists/shoppingItemSlice";
+import {
+  addItem,
+  deleteItem,
+  setItems,
+  updateItem,
+} from "../features/shoppingLists/shoppingItemSlice";
 
 export const ShoppingListDetails = () => {
   const { listId } = useParams();
@@ -24,6 +31,12 @@ export const ShoppingListDetails = () => {
   const [name, setName] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [category, setCategory] = useState("");
+
+  // for updating/ editing the state
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editQuantity, setEditQuantity] = useState(1);
+  const [editCategory, setEditCategory] = useState("");
 
   //Now to read values directly from the URL
   const searchQuery = searchParams.get("search") || "";
@@ -55,6 +68,30 @@ export const ShoppingListDetails = () => {
       setCategory("");
     } catch (error) {
       console.error("Failed to add item", error);
+    }
+  };
+  const handleUpdateItem = async (id: string) => {
+    if (!editName.trim() || !editCategory) return;
+    try {
+      const updated = await updateShoppingItem(id, {
+        name: editName,
+        quantity: editQuantity,
+        category: editCategory,
+      });
+      dispatch(updateItem(updated));
+      setEditingId(null);
+    } catch (error) {
+      console.error("Failed to update item", error);
+    }
+  };
+
+  const handleDeleteItem = async (id: string) => {
+    if (!window.confirm("Are you sure you want to delete this item?")) return;
+    try {
+      await deleteShoppingItem(id);
+      dispatch(deleteItem(id));
+    } catch (error) {
+      console.error("Failed to delete item", error);
     }
   };
 
@@ -197,16 +234,93 @@ export const ShoppingListDetails = () => {
       </form>
 
       <div className="lists-grid">
-        {items.length === 0 ? (
-          <p>No items in this list yet.</p>
+        {displayedItems.length === 0 ? (
+          <p>No items found.</p>
         ) : (
-          items.map((item) => (
-            <div key={item.id} className="list-card list-card-flex">
-              <div>
-                <h3 className="item-title">{item.name}</h3>
-                <p className="list-card-date">Category: {item.category}</p>
-              </div>
-              <div className="item-quantity">x{item.quantity}</div>
+          displayedItems.map((item) => (
+            <div key={item.id} className="list-card">
+              {editingId === item.id ? (
+                // EDIT MODE
+                <div>
+                  <div
+                    className="item-form-row"
+                    style={{ marginTop: 0, marginBottom: "12px" }}
+                  >
+                    <input
+                      type="text"
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      className="edit-input"
+                      style={{ marginBottom: 0 }}
+                    />
+                    <input
+                      type="number"
+                      min="1"
+                      value={editQuantity}
+                      onChange={(e) => setEditQuantity(Number(e.target.value))}
+                      className="edit-input input-small"
+                      style={{ marginBottom: 0 }}
+                    />
+                    <select
+                      value={editCategory}
+                      onChange={(e) => setEditCategory(e.target.value)}
+                      className="edit-input"
+                      style={{ marginBottom: 0 }}
+                    >
+                      <option value="Groceries">Groceries</option>
+                      <option value="Electronics">Electronics</option>
+                      <option value="Clothing">Clothing</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                  <div className="card-actions">
+                    <button
+                      onClick={() => handleUpdateItem(item.id)}
+                      className="action-btn edit-btn"
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={() => setEditingId(null)}
+                      className="action-btn delete-btn"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                // VIEW MODE
+                <div>
+                  <div className="list-card-flex">
+                    <div>
+                      <h3 className="item-title">{item.name}</h3>
+                      <p className="list-card-date">
+                        Category: {item.category}
+                      </p>
+                    </div>
+                    <div className="item-quantity">x{item.quantity}</div>
+                  </div>
+                  <div className="card-actions">
+                    <button
+                      onClick={() => {
+                        setEditingId(item.id);
+                        setEditName(item.name);
+                        setEditQuantity(item.quantity);
+                        setEditCategory(item.category);
+                      }}
+                      className="action-btn edit-btn"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDeleteItem(item.id)}
+                      className="action-btn delete-btn"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           ))
         )}

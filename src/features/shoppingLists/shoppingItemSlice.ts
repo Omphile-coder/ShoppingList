@@ -21,8 +21,21 @@ const shoppingItemSlice = createSlice({
         addItem:(state, action: PayloadAction<ShoppingItem>) => { 
             state.items.push(action.payload);
         },
+        updateItem: (state, action: PayloadAction<ShoppingItem>) => { 
+            const index = state.items.findIndex(item => item.id === action.payload.id);
+
+            if (index !== -1) {
+                state.items[index] = action.payload;
+            }
+        },
+
+        deleteItem: (state, action: PayloadAction<string>) => { 
+            state.items = state.items.filter(item => item.id !== action.payload);
+        },
+
+
     },
 });
 
-export const { setItems, addItem } = shoppingItemSlice.actions;
+export const { setItems, addItem, updateItem, deleteItem } = shoppingItemSlice.actions;
 export default shoppingItemSlice.reducer;
