@@ -13,32 +13,33 @@ import {
   setItems,
   updateItem,
 } from "../features/shoppingLists/shoppingItemSlice";
+import emptyIcon from "../assets/EmptyState.webp";
 
 export const ShoppingListDetails = () => {
   const { listId } = useParams();
-
-  //URL Parameter Hook!
   const [searchParams, setSearchParams] = useSearchParams();
 
   const dispatch = useAppDispatch();
   const items = useAppSelector((state) => state.shoppingItems.items);
   const lists = useAppSelector((state) => state.shoppingLists.lists);
 
-  // find the name of the current list so we can use it as the page title
   const currentList = lists.find((list) => list.id === listId);
 
-  // For the form
+  // Overlay State
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+  // Form State
   const [name, setName] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [category, setCategory] = useState("");
 
-  // for updating/ editing the state
+  // Edit State
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const [editQuantity, setEditQuantity] = useState(1);
   const [editCategory, setEditCategory] = useState("");
 
-  //Now to read values directly from the URL
+  // URL States
   const searchQuery = searchParams.get("search") || "";
   const sortValue = searchParams.get("sort") || "name";
 
@@ -50,7 +51,6 @@ export const ShoppingListDetails = () => {
 
   const handleAddItem = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!name.trim() || !category || !listId) return;
 
     try {
@@ -66,10 +66,12 @@ export const ShoppingListDetails = () => {
       setName("");
       setQuantity(1);
       setCategory("");
+      setIsAddModalOpen(false);
     } catch (error) {
       console.error("Failed to add item", error);
     }
   };
+
   const handleUpdateItem = async (id: string) => {
     if (!editName.trim() || !editCategory) return;
     try {
@@ -95,16 +97,13 @@ export const ShoppingListDetails = () => {
     }
   };
 
-  // functions to safely updae the url when the user types or selects
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newParams = new URLSearchParams(searchParams);
-
     if (e.target.value) {
       newParams.set("search", e.target.value);
     } else {
       newParams.delete("search");
     }
-
     setSearchParams(newParams);
   };
 
@@ -114,33 +113,22 @@ export const ShoppingListDetails = () => {
     setSearchParams(newParams);
   };
 
-  // Now to use useMemo to filter and sort items array based on the URL
   const displayedItems = useMemo(() => {
     let result = [...items];
 
-    //filter by search Query
     if (searchQuery) {
       result = result.filter((item) =>
         item.name.toLowerCase().includes(searchQuery.toLowerCase()),
       );
     }
 
-    //Sort the result
     result.sort((a, b) => {
-      if (sortValue === "name") {
-        return a.name.localeCompare(b.name);
-      }
-
-      if (sortValue === "category") {
-        return a.category.localeCompare(b.category);
-      }
-
-      if (sortValue === "date") {
+      if (sortValue === "name") return a.name.localeCompare(b.name);
+      if (sortValue === "category") return a.category.localeCompare(b.category);
+      if (sortValue === "date")
         return (
           new Date(a.dateAdded).getTime() - new Date(b.dateAdded).getTime()
         );
-      }
-
       return 0;
     });
 
@@ -148,31 +136,44 @@ export const ShoppingListDetails = () => {
   }, [items, searchQuery, sortValue]);
 
   return (
-    <main className="dashnoard-container">
+    <main className="dashboard-container">
       <Link to="/" className="back-link">
         &larr; Back to Dashboard
       </Link>
 
-      <div className="dashboard-header">
-        <h1>{currentList ? currentList.name : "Shopping List"}</h1>
+      {/* HEADER WITH ADD BUTTON */}
+      <div
+        className="dashboard-header"
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <h1 style={{ margin: 0 }}>
+          {currentList ? currentList.name : "Shopping List"}
+        </h1>
+        <button
+          className="action-btn btn-primary"
+          onClick={() => setIsAddModalOpen(true)}
+          style={{ padding: "10px 20px" }}
+        >
+          + Add New Item
+        </button>
       </div>
 
-      {/* Search bar */}
-
+      {/* SEARCH AND SORT CONTROLS */}
       <div className="controls-container">
         <div className="search-input">
           <label className="control-label">Search:</label>
-
           <input
             type="text"
-            placeholder="find an item..."
+            placeholder="Find an item..."
             value={searchQuery}
             onChange={handleSearchChange}
             className="auth-input"
           />
         </div>
-
-        {/* Controls */}
         <div className="sort-select">
           <label className="control-label">Sort By:</label>
           <select
@@ -186,56 +187,99 @@ export const ShoppingListDetails = () => {
           </select>
         </div>
       </div>
-      <form onSubmit={handleAddItem} className="item-form-container">
-        <h3>Add New Item</h3>
 
-        <div className="item-form-row">
-          <input
-            type="text"
-            placeholder="Item (e.g.., Milk)"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="authg-input"
-            required
-          />
+      {/* MODAL OVERLAY FOR ADDING ITEMS */}
+      {isAddModalOpen && (
+        <div className="modal-overlay" onClick={() => setIsAddModalOpen(false)}>
+          {/* stopPropagation prevents closing when clicking inside the white box */}
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Add New Item</h3>
+              <button
+                className="close-btn"
+                onClick={() => setIsAddModalOpen(false)}
+              >
+                &times;
+              </button>
+            </div>
 
-          <input
-            type="number"
-            min="1"
-            value={quantity}
-            onChange={(e) => setQuantity(Number(e.target.value))}
-            className="auth-input input-small"
-            required
-          />
+            <form
+              onSubmit={handleAddItem}
+              style={{ display: "flex", flexDirection: "column", gap: "16px" }}
+            >
+              <div>
+                <label className="control-label">Item Name</label>
+                <input
+                  type="text"
+                  placeholder="e.g., Milk"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="auth-input"
+                  required
+                />
+              </div>
 
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className="auth-input"
-            required
-          >
-            <option value="" disabled>
-              Select Category
-            </option>
-            <option value="Groceries">Groceries</option>
-            <option value="Electronics">Electronics</option>
-            <option value="Clothing">Clothing</option>
-            <option value="Other">Other</option>
-          </select>
+              <div style={{ display: "flex", gap: "16px" }}>
+                <div style={{ flex: 1 }}>
+                  <label className="control-label">Quantity</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={quantity}
+                    onChange={(e) => setQuantity(Number(e.target.value))}
+                    className="auth-input"
+                    required
+                  />
+                </div>
+                <div style={{ flex: 2 }}>
+                  <label className="control-label">Category</label>
+                  <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    className="auth-input"
+                    required
+                  >
+                    <option value="" disabled>
+                      Select Category
+                    </option>
+                    <option value="Groceries">Groceries</option>
+                    <option value="Electronics">Electronics</option>
+                    <option value="Clothing">Clothing</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+              </div>
 
-          <button
-            type="submit"
-            className="auth-button"
-            style={{ marginTop: 0 }}
-          >
-            Add
-          </button>
+              <button
+                type="submit"
+                className="auth-button"
+                style={{ marginTop: "8px" }}
+              >
+                Save Item
+              </button>
+            </form>
+          </div>
         </div>
-      </form>
+      )}
 
+      {/* ITEMS LIST & EMPTY STATE */}
       <div className="lists-grid">
         {displayedItems.length === 0 ? (
-          <p>No items found.</p>
+          <div className="emptyState-Cont">
+            <div className="empty-Image-Cont">
+              <img src={emptyIcon} alt="No items found" />
+            </div>
+            <h1>No items yet</h1>
+            <span>
+              <button
+                className="action-btn btn-primary"
+                onClick={() => setIsAddModalOpen(true)}
+                style={{ padding: "10px 20px" }}
+              >
+                + Add New Item
+              </button>
+            </span>
+          </div>
         ) : (
           displayedItems.map((item) => (
             <div key={item.id} className="list-card">

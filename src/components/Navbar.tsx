@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { logout } from "../features/auth/authSlice";
+import { User } from "lucide-react";
 
 export const Navbar = () => {
   const navigate = useNavigate();
@@ -21,10 +22,10 @@ export const Navbar = () => {
 
       <div className="nav-links">
         <Link to="/" className="nav-link">
-          Dashboard
+          Home
         </Link>
         <Link to="/profile" className="nav-link">
-          Profile
+          <User />
         </Link>
         <button onClick={handleLogout} className="logout-btn">
           Logout
