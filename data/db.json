@@ -9,11 +9,11 @@
       "id": "hMznP8Zr5JA"
     },
     {
-      "name": "Dimpho",
+      "name": "Omphile",
       "surname": "Lucas",
       "email": "lucas@gmail.com",
       "cellNumber": "0787894839",
-      "password": "U2FsdGVkX19fEUrRTOdpMbh5FrARunwsu6H3wuq7ubc=",
+      "password": "U2FsdGVkX1/lw2dctqhdUHhHqSzWPJ8OlNQLHMxk15w=",
       "id": "bt-9xr-Ojis"
     },
     {
@@ -23,6 +23,15 @@
       "cellNumber": "0796349136",
       "password": "U2FsdGVkX1/y/3JCp0eAllVZxGAs4R+kPW5RgR7ZtZ4=",
       "id": "J5Yer66Afs0"
+    },
+    {
+      "name": "Didintle",
+      "surname": "Manki",
+      "email": "didi@gmail.com",
+      "cellnumber": "",
+      "password": "U2FsdGVkX1/kt9WtLjn5/Yto3Qm96qkqhk7d6y8f154=",
+      "cellNumber": "0123456",
+      "id": "9Ql8D0Y3-C8"
     }
   ],
   "shoppingLists": [
