@@ -112,6 +112,20 @@ body {
   text-align: center;
 }
 
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+}
+
+.input-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
 /*
 HOME PAGE
 */

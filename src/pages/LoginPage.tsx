@@ -35,7 +35,6 @@ export const LoginPage = () => {
       }
 
       //   If they match, tell Redux that the user is logged in!
-
       const { password: _, ...safeUser } = user;
       dispatch(login(safeUser));
 
@@ -54,23 +53,35 @@ export const LoginPage = () => {
       {error && <p className="alert-error">{error}</p>}
 
       <form onSubmit={handleSubmit} className="auth-form">
-        <input
-          type="email"
-          placeholder="Email"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="auth-input"
-        />
+        <div className="input-group">
+          <label htmlFor="email" className="input-label">
+            Email
+          </label>
+          <input
+            id="email"
+            type="email"
+            placeholder="Email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="auth-input"
+          />
+        </div>
 
-        <input
-          type="password"
-          placeholder="Password"
-          required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="auth-input"
-        />
+        <div className="input-group">
+          <label htmlFor="password" className="input-label">
+            Password
+          </label>
+          <input
+            id="password"
+            type="password"
+            placeholder="Password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="auth-input"
+          />
+        </div>
 
         <button type="submit" className="auth-button">
           Log In
