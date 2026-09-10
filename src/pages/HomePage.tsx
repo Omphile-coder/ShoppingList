@@ -13,6 +13,7 @@ import {
   deleteShoppingList,
 } from "../services/shoppingListService";
 import { Link } from "react-router-dom";
+import emptyIcon from "../assets/EmptyState.webp";
 
 const HomePage = () => {
   const dispatch = useAppDispatch();
@@ -97,7 +98,13 @@ const HomePage = () => {
 
       <div className="lists-grid">
         {lists.length === 0 ? (
-          <p>You don't have any lists yet.</p>
+          <div className="emptyState-Cont">
+            <div className="empty-Image-Cont">
+              <img src={emptyIcon} alt="No items found" />
+            </div>
+            <h1>No Lists yet</h1>
+            <span></span>
+          </div>
         ) : (
           lists.map((list) => (
             <div key={list.id} className="list-card">

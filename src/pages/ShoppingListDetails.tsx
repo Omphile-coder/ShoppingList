@@ -138,7 +138,7 @@ export const ShoppingListDetails = () => {
   return (
     <main className="dashboard-container">
       <Link to="/" className="back-link">
-        &larr; Back to Dashboard
+        ← Back to Dashboard
       </Link>
 
       {/* HEADER WITH ADD BUTTON */}
