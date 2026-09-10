@@ -38,7 +38,7 @@ export const RegisterPage = () => {
       const existingUser = await getUserByEmail(formData.email);
 
       if (existingUser) {
-        setError("An account with this enail alrady exists.");
+        setError("An account with this email already exists.");
         return;
       }
 
@@ -55,56 +55,80 @@ export const RegisterPage = () => {
       setError("Something went wrong during registration.");
     }
   };
+
   return (
     <main className="auth-container">
       <h1>Create Account</h1>
 
       {error && <p className="alert-error">{error}</p>}
-
       {success && <p className="alert-success">{success}</p>}
 
       <form onSubmit={handleSubmit} className="auth-form">
-        <input
-          name="name"
-          type="text"
-          placeholder="Name"
-          required
-          onChange={handleChange}
-          className="auth-input"
-        />
-        <input
-          name="surname"
-          type="text"
-          placeholder="Surname"
-          required
-          onChange={handleChange}
-          className="auth-input"
-        />
-        <input
-          name="email"
-          type="email"
-          placeholder="Email"
-          required
-          onChange={handleChange}
-          className="auth-input"
-        />
-        <input
-          name="cellNumber"
-          type="tel"
-          placeholder="Cell Number"
-          required
-          onChange={handleChange}
-          className="auth-input"
-        />
-        <input
-          name="password"
-          type="password"
-          placeholder="Password"
-          minLength={8}
-          required
-          onChange={handleChange}
-          className="auth-input"
-        />
+        <div className="input-group">
+          <label htmlFor="name" className="input-label">First Name</label>
+          <input
+            id="name"
+            name="name"
+            type="text"
+            placeholder="Name"
+            required
+            onChange={handleChange}
+            className="auth-input"
+          />
+        </div>
+
+        <div className="input-group">
+          <label htmlFor="surname" className="input-label">Last Name</label>
+          <input
+            id="surname"
+            name="surname"
+            type="text"
+            placeholder="Surname"
+            required
+            onChange={handleChange}
+            className="auth-input"
+          />
+        </div>
+
+        <div className="input-group">
+          <label htmlFor="email" className="input-label">Email Address</label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            placeholder="Email"
+            required
+            onChange={handleChange}
+            className="auth-input"
+          />
+        </div>
+
+        <div className="input-group">
+          <label htmlFor="cellNumber" className="input-label">Cell Number</label>
+          <input
+            id="cellNumber"
+            name="cellNumber"
+            type="tel"
+            placeholder="Cell Number"
+            required
+            onChange={handleChange}
+            className="auth-input"
+          />
+        </div>
+
+        <div className="input-group">
+          <label htmlFor="password" className="input-label">Password</label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            placeholder="Password"
+            minLength={8}
+            required
+            onChange={handleChange}
+            className="auth-input"
+          />
+        </div>
 
         <button type="submit" className="auth-button">
           Register
