@@ -65,7 +65,9 @@ export const RegisterPage = () => {
 
       <form onSubmit={handleSubmit} className="auth-form">
         <div className="input-group">
-          <label htmlFor="name" className="input-label">First Name</label>
+          <label htmlFor="name" className="input-label">
+            First Name:
+          </label>
           <input
             id="name"
             name="name"
@@ -78,7 +80,9 @@ export const RegisterPage = () => {
         </div>
 
         <div className="input-group">
-          <label htmlFor="surname" className="input-label">Last Name</label>
+          <label htmlFor="surname" className="input-label">
+            Last Name:
+          </label>
           <input
             id="surname"
             name="surname"
@@ -91,7 +95,9 @@ export const RegisterPage = () => {
         </div>
 
         <div className="input-group">
-          <label htmlFor="email" className="input-label">Email Address</label>
+          <label htmlFor="email" className="input-label">
+            Email Address:
+          </label>
           <input
             id="email"
             name="email"
@@ -104,7 +110,9 @@ export const RegisterPage = () => {
         </div>
 
         <div className="input-group">
-          <label htmlFor="cellNumber" className="input-label">Cell Number</label>
+          <label htmlFor="cellNumber" className="input-label">
+            Cell Number:
+          </label>
           <input
             id="cellNumber"
             name="cellNumber"
@@ -117,7 +125,9 @@ export const RegisterPage = () => {
         </div>
 
         <div className="input-group">
-          <label htmlFor="password" className="input-label">Password</label>
+          <label htmlFor="password" className="input-label">
+            Password:
+          </label>
           <input
             id="password"
             name="password"

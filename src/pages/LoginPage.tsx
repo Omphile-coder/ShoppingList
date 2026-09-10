@@ -55,7 +55,7 @@ export const LoginPage = () => {
       <form onSubmit={handleSubmit} className="auth-form">
         <div className="input-group">
           <label htmlFor="email" className="input-label">
-            Email
+            Email:
           </label>
           <input
             id="email"
@@ -70,7 +70,7 @@ export const LoginPage = () => {
 
         <div className="input-group">
           <label htmlFor="password" className="input-label">
-            Password
+            Password:
           </label>
           <input
             id="password"
