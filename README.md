@@ -25,49 +25,52 @@ A modern, responsive shopping list application built with React, TypeScript, and
 
 To run this project locally, you will need Node.js installed on your machine. This project requires two separate servers to run simultaneously: the Vite frontend and the JSON server backend.
 
-1. **Clone the repository:**
+1.  **Clone the repository:**
 
-   ```bash
-   git clone [https://github.com/Omphile-coder/shopping-list-app.git](https://github.com/Omphile-coder/shopping-list-app.git)
-   cd shopping-list-app
+    ```bash
+    git clone [https://github.com/Omphile-coder/shopping-list-app.git](https://github.com/Omphile-coder/shopping-list-app.git)
+    cd shopping-list-app
+    ```
 
-   ```
+2.  **Install dependencies:**
 
-2. **Install dependencies:**
+    ```bash
 
-```bash
-npm i
-```
+    npm i
 
-3. **Start the JSON Server (Backend):**
+    ```
 
-```bash
-npm run server
+3.  **Start the JSON Server (Backend):**
 
-```
+    ```bash
 
-4. **Start the Vite Development Server (Frontend):**
+    npm run server
 
-```bash
-npm run dev
+    ```
 
-```
+4.  **Start the Vite Development Server (Frontend):**
 
-5. **Open the App:**
+    ```bash
+
+    npm run dev
+    ```
+
+5.  **Open the App:**
 
 Navigate to http://localhost:5173 in your browser.
 
 ## 📁 Project Structure
 
 src/
-├── assets/ # Images and static assets
-├── components/ # Reusable UI components (Navbar, ProtectedRoutes)
-├── features/ # Redux slices (authSlice, shoppingListsSlice, shoppingItemSlice)
-├── pages/ # Full page views (Home, Login, Register, Profile, Details)
-├── services/ # Axios API calls (authService, shoppingListService)
-├── store/ # Redux store configuration and typed hooks
-├── utils/ # Helper functions (encryption.ts)
-├── App.tsx # Root component
+
+├── assets/ # Images and static assets<br>
+├── components/ # Reusable UI components (Navbar, ProtectedRoutes)<br>
+├── features/ # Redux slices (authSlice, shoppingListsSlice, shoppingItemSlice)<br>
+├── pages/ # Full page views (Home, Login, Register, Profile, Details)<br>
+├── services/ # Axios API calls (authService, shoppingListService)<br>
+├── store/ # Redux store configuration and typed hooks<br>
+├── utils/ # Helper functions (encryption.ts)<br>
+├── App.tsx # Root component<br>
 └── index.css # Global design system and custom styling
 
 ## Author
@@ -77,3 +80,7 @@ Omphile Lucas
 GitHub: @Omphile-coder
 
 Developed for CodeTribe Academy Task 4
+
+```
+
+```
