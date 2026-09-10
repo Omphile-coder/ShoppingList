@@ -81,6 +81,4 @@ GitHub: @Omphile-coder
 
 Developed for CodeTribe Academy Task 4
 
-```
 
-```
