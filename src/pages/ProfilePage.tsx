@@ -139,7 +139,11 @@ export const ProfilePage = () => {
           </div>
         ) : (
           <form onSubmit={handleUpdateInfo} className="auth-form">
+            <label htmlFor="profile-name" className="input-label">
+              Name:
+            </label>
             <input
+              id="profile-name"
               type="text"
               value={infoForm.name}
               onChange={(e) =>
@@ -148,7 +152,11 @@ export const ProfilePage = () => {
               className="auth-input"
               required
             />
+            <label htmlFor="profile-surname" className="input-label">
+              Surname:
+            </label>
             <input
+              id="profile-surname"
               type="text"
               value={infoForm.surname}
               onChange={(e) =>
@@ -157,7 +165,11 @@ export const ProfilePage = () => {
               className="auth-input"
               required
             />
+            <label htmlFor="profile-email" className="input-label">
+              Email:
+            </label>
             <input
+              id="profile-email"
               type="email"
               value={infoForm.email}
               onChange={(e) =>
@@ -166,7 +178,11 @@ export const ProfilePage = () => {
               className="auth-input"
               required
             />
+            <label htmlFor="profile-cell-number" className="input-label">
+              Cell Number:
+            </label>
             <input
+              id="profile-cell-number"
               type="tel"
               value={infoForm.cellNumber}
               onChange={(e) =>
@@ -214,18 +230,24 @@ export const ProfilePage = () => {
 
         {isEditingPassowrd && (
           <form onSubmit={handleUpdatePassword} className="auth-form">
+            <label htmlFor="new-password" className="input-label">
+              New Password:
+            </label>
             <input
+              id="new-password"
               type="password"
-              placeholder="New Password"
               minLength={8}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="auth-input"
               required
             />
+            <label htmlFor="confirm-password" className="input-label">
+              Confirm New Password:
+            </label>
             <input
+              id="confirm-password"
               type="password"
-              placeholder="Confirm New Password"
               minLength={8}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}

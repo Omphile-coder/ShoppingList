@@ -18,6 +18,75 @@ import emptyIcon from "../assets/EmptyState.webp";
 import Toast from "../components/Toast";
 import ConfirmOverlay from "../components/ConfirmOverlay";
 
+const categoryKeywords: Record<string, string[]> = {
+  Groceries: [
+    "milk",
+    "bread",
+    "cheese",
+    "egg",
+    "meat",
+    "chicken",
+    "beef",
+    "fish",
+    "fruit",
+    "vegetable",
+    "food",
+    "rice",
+    "pasta",
+    "water",
+    "juice",
+    "snack",
+  ],
+  Electronics: [
+    "phone",
+    "laptop",
+    "computer",
+    "tablet",
+    "charger",
+    "cable",
+    "headphone",
+    "earbud",
+    "camera",
+    "speaker",
+    "keyboard",
+    "mouse",
+    "monitor",
+    "television",
+    "tv",
+    "battery",
+  ],
+  Clothing: [
+    "shirt",
+    "t-shirt",
+    "jean",
+    "pant",
+    "dress",
+    "skirt",
+    "shoe",
+    "sock",
+    "coat",
+    "jacket",
+    "hat",
+    "belt",
+    "underwear",
+  ],
+};
+
+const itemFitsCategory = (itemName: string, category: string) => {
+  const normalizedName = itemName.trim().toLowerCase();
+  const matchingKeywords = categoryKeywords[category];
+
+  if (!matchingKeywords) return true;
+
+  const belongsToAnotherCategory = Object.entries(categoryKeywords).some(
+    ([otherCategory, keywords]) =>
+      otherCategory !== category &&
+      keywords.some((keyword) => normalizedName.includes(keyword)),
+  );
+
+  return !belongsToAnotherCategory;
+};
+
 export const ShoppingListDetails = () => {
   const { listId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -46,6 +115,9 @@ export const ShoppingListDetails = () => {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isSavingItem, setIsSavingItem] = useState(false);
+  const [itemValidationError, setItemValidationError] = useState<string | null>(
+    null,
+  );
 
   // URL States
   const searchQuery = searchParams.get("search") || "";
@@ -78,6 +150,13 @@ export const ShoppingListDetails = () => {
     e.preventDefault();
     if (!name.trim() || !category || !listId) return;
 
+    if (!itemFitsCategory(name, category)) {
+      setItemValidationError(
+        `"${name.trim()}" does not fit the ${category} category.`,
+      );
+      return;
+    }
+
     if (isSavingItem) return;
 
     setIsSavingItem(true);
@@ -94,6 +173,7 @@ export const ShoppingListDetails = () => {
       setName("");
       setQuantity(1);
       setCategory("");
+      setItemValidationError(null);
       setIsAddModalOpen(false);
       setToast("Shopping item added successfully!");
     } catch (error) {
@@ -105,6 +185,14 @@ export const ShoppingListDetails = () => {
 
   const handleUpdateItem = async (id: string) => {
     if (!editName.trim() || !editCategory) return;
+
+    if (!itemFitsCategory(editName, editCategory)) {
+      setToast(
+        `"${editName.trim()}" does not fit the ${editCategory} category.`,
+      );
+      return;
+    }
+
     try {
       const updated = await updateShoppingItem(id, {
         name: editName,
@@ -113,6 +201,7 @@ export const ShoppingListDetails = () => {
       });
       dispatch(updateItem(updated));
       setEditingId(null);
+      setItemValidationError(null);
       const cached = getCachedShoppingItems(listId || updated.listId);
       localStorage.setItem(
         `shoppingItems:${listId || updated.listId}`,
@@ -307,6 +396,12 @@ export const ShoppingListDetails = () => {
                     </select>
                   </div>
                 </div>
+
+                {itemValidationError && (
+                  <p role="alert" style={{ color: "#b42318", margin: 0 }}>
+                    {itemValidationError}
+                  </p>
+                )}
 
                 <button
                   type="submit"
