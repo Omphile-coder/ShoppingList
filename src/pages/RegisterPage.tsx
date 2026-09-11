@@ -59,13 +59,13 @@ export const RegisterPage = () => {
   };
 
   return (
-    <main className="auth-container">
+    <main className="auth-container register-container">
       <h1>Create Account</h1>
 
       {error && <p className="alert-error">{error}</p>}
       {success && <p className="alert-success">{success}</p>}
 
-      <form onSubmit={handleSubmit} className="auth-form">
+      <form onSubmit={handleSubmit} className="auth-form register-form">
         <div className="input-group">
           <label htmlFor="name" className="input-label">
             First Name:
