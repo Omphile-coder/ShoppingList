@@ -14,7 +14,7 @@ export const RegisterPage = () => {
     name: "",
     surname: "",
     email: "",
-    cellnumber: "",
+    cellNumber: "",
     password: "",
   });
 
