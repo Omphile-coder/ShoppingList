@@ -4,6 +4,7 @@ import { useState } from "react";
 import { getUserByEmail } from "../services/authService";
 import { decryptData } from "../utils/encryption";
 import { login } from "../features/auth/authSlice";
+import listIcon from "../assets/ListIcon.webp";
 
 export const LoginPage = () => {
   const navigate = useNavigate();
@@ -52,6 +53,9 @@ export const LoginPage = () => {
 
   return (
     <main className="auth-container">
+      <div className="auth-icon-circle" aria-hidden="true">
+        <img src={listIcon} alt="" />
+      </div>
       <h1>Welcome Back</h1>
 
       {error && <p className="alert-error">{error}</p>}

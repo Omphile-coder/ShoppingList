@@ -44,6 +44,24 @@ body {
   color: var(--text-main);
 }
 
+.auth-icon-circle {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 16px;
+  border: 1px solid var(--primary-color);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-color);
+}
+
+.auth-icon-circle img {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+}
+
 .auth-form {
   display: flex;
   flex-direction: column;
