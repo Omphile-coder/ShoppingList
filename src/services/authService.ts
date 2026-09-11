@@ -1,47 +1,49 @@
 import api from "./api";
-import { encryptData }  from "../utils/encryption"
+import { encryptData } from "../utils/encryption";
 
+export interface RegisterData {
+  email: string;
+  password: string;
+  name: string;
+  surname: string;
+  cellNumber: string;
+}
 
-export interface RegisterData { 
-    email: string;
-    password: string;
-    name: string;
-    surname: string;
-    cellnumber: string;
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  surname: string;
+  cellNumber?: string;
+  cellnumber?: string;
+  password?: string;
 }
 
 export const registerUser = async (userData: RegisterData) => {
-    //  Encrypt the password before sending it to the database
-    const encryptedPassword = encryptData(userData.password);
+  const encryptedPassword = encryptData(userData.password);
+  const formattedEmail = userData.email.trim().toLowerCase();
 
-    // Format the email to lowercase so logins are case-insensitive
-    const formattedEmail = userData.email.trim().toLowerCase();
+  const response = await api.post<User>("/users", {
+    ...userData,
+    email: formattedEmail,
+    password: encryptedPassword,
+  });
 
+  return response.data;
+};
 
-    // Send a POST request to create the user in db.json
-    const response = await api.post("/users", {
-        ...userData, email: formattedEmail,
-        password:encryptedPassword,
-    });
-
-    return response.data;
-}
- 
 export const getUserByEmail = async (email: string) => {
-    // Send a GET request to search for a user by email
-    const response = await api.get("/users", {
-        params: {
-            email: email.trim().toLowerCase(),
-        },
-    });
+  const response = await api.get<User[]>("/users", {
+    params: { email: email.trim().toLowerCase() },
+  });
 
+  return response.data.length > 0 ? response.data[0] : null;
+};
 
-    // JSON Server returns an array, If we find a user then we take the first one
-    return response.data.length > 0 ? response.data[0] : null;
-}
- 
-// Update user data (using PATCH to only update specific fields)
-export const updateUser = async (id: string, userData: Partial<RegisterData>) => {
-    const response = await api.patch(`/users/${id}`, userData);
-    return response.data;
- }
+export const updateUser = async (
+  id: string,
+  userData: Partial<RegisterData>,
+) => {
+  const response = await api.patch<User>(`/users/${id}`, userData);
+  return response.data;
+};
