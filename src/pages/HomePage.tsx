@@ -8,11 +8,14 @@ import {
 } from "../features/shoppingLists/shoppingListsSlice";
 import {
   getShoppingLists,
+  getCachedShoppingLists,
   createShopppingList,
   updateShoppingList,
   deleteShoppingList,
 } from "../services/shoppingListService";
 import { Link } from "react-router-dom";
+import Toast from "../components/Toast";
+import ConfirmOverlay from "../components/ConfirmOverlay";
 import emptyIcon from "../assets/EmptyState.webp";
 
 const HomePage = () => {
@@ -23,14 +26,33 @@ const HomePage = () => {
   const [newListName, setNewListName] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Fetch lists when the page loads
   useEffect(() => {
-    if (currentUser) {
-      getShoppingLists(currentUser.id).then((data) => {
-        dispatch(setLists(data));
+    if (!currentUser) return;
+
+    // Clear data from a previous user, then render this user's cached data immediately.
+    dispatch(setLists([]));
+    const cachedLists = getCachedShoppingLists(currentUser.id);
+    if (cachedLists.length > 0) dispatch(setLists(cachedLists));
+
+    let cancelled = false;
+    setIsLoading(cachedLists.length === 0);
+
+    getShoppingLists(currentUser.id)
+      .then((data) => {
+        if (!cancelled) dispatch(setLists(data));
+      })
+      .catch((error) => console.error("Failed to load shopping lists", error))
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
       });
-    }
+
+    return () => { cancelled = true; };
   }, [currentUser, dispatch]);
 
   const handleCreateList = async (e: React.FormEvent) => {
@@ -46,6 +68,7 @@ const HomePage = () => {
 
       dispatch(addList(newList));
       setNewListName("");
+      setToast("Shopping list added successfully!");
     } catch (error) {
       console.error("Failed to create list", error);
     }
@@ -62,22 +85,44 @@ const HomePage = () => {
 
       dispatch(updateList(updated));
       setEditingId(null);
+      if (currentUser) {
+        const cached = getCachedShoppingLists(currentUser.id);
+        localStorage.setItem(
+          `shoppingLists:${currentUser.id}`,
+          JSON.stringify(cached.map((item) => item.id === id ? updated : item)),
+        );
+      }
+      setToast("Shopping list updated successfully!");
     } catch (error) {
-      console.error("failed to updae list", error);
+      console.error("failed to update list", error);
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm("Are you sure you want to delete this list?")) return;
+  const handleDelete = async () => {
+    if (!deleteId) return;
+
+    setIsDeleting(true);
     try {
-      await deleteShoppingList(id);
-      dispatch(deleteList(id));
+      await deleteShoppingList(deleteId);
+      dispatch(deleteList(deleteId));
+      if (currentUser) {
+        const cached = getCachedShoppingLists(currentUser.id);
+        localStorage.setItem(
+          `shoppingLists:${currentUser.id}`,
+          JSON.stringify(cached.filter((item) => item.id !== deleteId)),
+        );
+      }
+      setDeleteId(null);
+      setToast("Shopping list deleted successfully!");
     } catch (error) {
       console.error("Failed to delete list", error);
+    } finally {
+      setIsDeleting(false);
     }
   };
   return (
-    <main className="dashboard-container">
+    <>
+      <main className="dashboard-container">
       <div className="dashboard-header">
         <h1>My Shopping Lists</h1>
         <p>Welcome back, {currentUser?.name}!</p>
@@ -97,7 +142,9 @@ const HomePage = () => {
       </form>
 
       <div className="lists-grid">
-        {lists.length === 0 ? (
+        {isLoading ? (
+          <div className="emptyState-Cont"><h2>Loading your lists...</h2></div>
+        ) : lists.length === 0 ? (
           <div className="emptyState-Cont">
             <div className="empty-Image-Cont">
               <img src={emptyIcon} alt="No items found" />
@@ -155,7 +202,7 @@ const HomePage = () => {
                       Edit
                     </button>
                     <button
-                      onClick={() => handleDelete(list.id)}
+                      onClick={() => setDeleteId(list.id)}
                       className="action-btn delete-btn"
                     >
                       Delete
@@ -167,7 +214,20 @@ const HomePage = () => {
           ))
         )}
       </div>
-    </main>
+      </main>
+
+      {toast && <Toast message={toast} onClose={() => setToast(null)} />}
+
+      {deleteId && (
+        <ConfirmOverlay
+          title="Delete shopping list?"
+          message="This action cannot be undone. The list and its saved data will be removed."
+          isLoading={isDeleting}
+          onConfirm={handleDelete}
+          onCancel={() => !isDeleting && setDeleteId(null)}
+        />
+      )}
+    </>
   );
 };
 
