@@ -12,10 +12,12 @@ export const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setIsLoading(true);
 
     try {
       //   Fetch the user from the database
@@ -42,7 +44,9 @@ export const LoginPage = () => {
       navigate("/");
     } catch (err) {
       console.error("Login error:", err);
-      setError("Something went wrong while logging in.");
+      setError("Something went wrong while logging in. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -83,8 +87,8 @@ export const LoginPage = () => {
           />
         </div>
 
-        <button type="submit" className="auth-button">
-          Log In
+        <button type="submit" className="auth-button" disabled={isLoading}>
+          {isLoading ? "Logging in..." : "Log In"}
         </button>
       </form>
 
