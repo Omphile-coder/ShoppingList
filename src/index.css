@@ -45,8 +45,8 @@ body {
 }
 
 .auth-icon-circle {
-  width: 64px;
-  height: 64px;
+  width: 65px;
+  height: 65px;
   margin: 0 auto 16px;
   border: 1px solid var(--primary-color);
   border-radius: 50%;
@@ -57,8 +57,8 @@ body {
 }
 
 .auth-icon-circle img {
-  width: 34px;
-  height: 34px;
+  width:50px;
+  height: 50px;
   object-fit: contain;
 }
 
