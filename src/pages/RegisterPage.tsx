@@ -20,6 +20,7 @@ export const RegisterPage = () => {
 
   const [error, setError] = useState("");
   const [success, setSucess] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -32,6 +33,7 @@ export const RegisterPage = () => {
     e.preventDefault();
     setError("");
     setSucess("");
+    setIsLoading(true);
 
     try {
       //   check if the email already in use
@@ -47,11 +49,12 @@ export const RegisterPage = () => {
 
       //   Show success message and redirects to login
       setSucess("Account created! Redirecting to login...");
-
       navigate("/login");
     } catch (err) {
       console.error(err);
-      setError("Something went wrong during registration.");
+      setError("Something went wrong during registration. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -139,8 +142,8 @@ export const RegisterPage = () => {
           />
         </div>
 
-        <button type="submit" className="auth-button">
-          Register
+        <button type="submit" className="auth-button" disabled={isLoading}>
+          {isLoading ? "Creating account..." : "Register"}
         </button>
       </form>
 
