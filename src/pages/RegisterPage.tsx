@@ -47,9 +47,8 @@ export const RegisterPage = () => {
 
       //   Show success message and redirects to login
       setSucess("Account created! Redirecting to login...");
-      setTimeout(() => {
-        navigate("/login");
-      }, 1500);
+
+      navigate("/login");
     } catch (err) {
       console.error(err);
       setError("Something went wrong during registration.");
