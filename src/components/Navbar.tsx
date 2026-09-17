@@ -25,9 +25,6 @@ export const Navbar = () => {
       </Link>
 
       <div className="nav-links">
-        <Link to="/" className="nav-link">
-          Home
-        </Link>
         <Link to="/profile" className="nav-link">
           <User />
         </Link>
