@@ -17,6 +17,7 @@ import {
 import emptyIcon from "../assets/EmptyState.webp";
 import Toast from "../components/Toast";
 import ConfirmOverlay from "../components/ConfirmOverlay";
+import { UnsplashImagePicker } from "../components/UnsplashImagePicker";
 
 const categoryKeywords: Record<string, string[]> = {
   Groceries: [
@@ -104,6 +105,7 @@ export const ShoppingListDetails = () => {
   const [name, setName] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [category, setCategory] = useState("");
+  const [image, setImage] = useState("");
 
   // Edit State
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -166,6 +168,7 @@ export const ShoppingListDetails = () => {
         name,
         quantity,
         category,
+        image: image || undefined,
         dateAdded: new Date().toISOString(),
       });
 
@@ -173,6 +176,7 @@ export const ShoppingListDetails = () => {
       setName("");
       setQuantity(1);
       setCategory("");
+      setImage("");
       setItemValidationError(null);
       setIsAddModalOpen(false);
       setToast("Shopping item added successfully!");
@@ -397,6 +401,14 @@ export const ShoppingListDetails = () => {
                   </div>
                 </div>
 
+                <UnsplashImagePicker
+                  label="Item image (optional)"
+                  searchHint={name}
+                  value={image}
+                  onChange={setImage}
+                  disabled={isSavingItem}
+                />
+
                 {itemValidationError && (
                   <p role="alert" style={{ color: "#b42318", margin: 0 }}>
                     {itemValidationError}
@@ -441,6 +453,13 @@ export const ShoppingListDetails = () => {
           ) : (
             displayedItems.map((item) => (
               <div key={item.id} className="list-card">
+                {item.image && editingId !== item.id && (
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="item-card-image"
+                  />
+                )}
                 {editingId === item.id ? (
                   // EDIT MODE
                   <div>
