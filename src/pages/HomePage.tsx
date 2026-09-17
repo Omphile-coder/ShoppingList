@@ -35,7 +35,7 @@ const HomePage = () => {
   useEffect(() => {
     if (!currentUser) return;
 
-    // Clear data from a previous user, then render this user's cached data immediately.
+    // Clear data from a previous user, then display this user's cached data immediately.
     dispatch(setLists([]));
     const cachedLists = getCachedShoppingLists(currentUser.id);
     if (cachedLists.length > 0) dispatch(setLists(cachedLists));
