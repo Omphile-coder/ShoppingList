@@ -52,7 +52,9 @@ const HomePage = () => {
         if (!cancelled) setIsLoading(false);
       });
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [currentUser, dispatch]);
 
   const handleCreateList = async (e: React.FormEvent) => {
@@ -89,7 +91,9 @@ const HomePage = () => {
         const cached = getCachedShoppingLists(currentUser.id);
         localStorage.setItem(
           `shoppingLists:${currentUser.id}`,
-          JSON.stringify(cached.map((item) => item.id === id ? updated : item)),
+          JSON.stringify(
+            cached.map((item) => (item.id === id ? updated : item)),
+          ),
         );
       }
       setToast("Shopping list updated successfully!");
@@ -123,97 +127,103 @@ const HomePage = () => {
   return (
     <>
       <main className="dashboard-container">
-      <div className="dashboard-header">
-        <h1>My Shopping Lists</h1>
-        <p>Welcome back, {currentUser?.name}!</p>
-      </div>
+        <div className="dashboard-header">
+          <h1>My Shopping Lists</h1>
+          <p>Welcome back, {currentUser?.name}!</p>
+        </div>
 
-      <form onSubmit={handleCreateList} className="add-list-form">
-        <input
-          type="text"
-          placeholder="New list name (e.g., Groceries)"
-          value={newListName}
-          onChange={(e) => setNewListName(e.target.value)}
-          className="auth-input"
-        />
-        <button type="submit" className="add-list-button">
-          Add List
-        </button>
-      </form>
+        <form onSubmit={handleCreateList} className="add-list-form">
+          <label htmlFor="listName" className="input-label">
+            New List Name:
+          </label>
+          <input
+            id="listName"
+            type="text"
+            placeholder="New list name (e.g., Groceries)"
+            value={newListName}
+            onChange={(e) => setNewListName(e.target.value)}
+            className="auth-input"
+          />
+          <button type="submit" className="add-list-button">
+            Add List
+          </button>
+        </form>
 
-      <div className="lists-grid">
-        {isLoading ? (
-          <div className="emptyState-Cont"><h2>Loading your lists...</h2></div>
-        ) : lists.length === 0 ? (
-          <div className="emptyState-Cont">
-            <div className="empty-Image-Cont">
-              <img src={emptyIcon} alt="No items found" />
+        <div className="lists-grid">
+          {isLoading ? (
+            <div className="emptyState-Cont">
+              <h2>Loading your lists...</h2>
             </div>
-            <h1>No Lists yet</h1>
-            <span></span>
-          </div>
-        ) : (
-          lists.map((list) => (
-            <div key={list.id} className="list-card">
-              {editingId === list.id ? (
-                <div>
-                  <input
-                    type="text"
-                    value={editingName}
-                    onChange={(e) => setEditingName(e.target.value)}
-                    className="edit-input"
-                    autoFocus
-                  />
-                  <div className="card-actions">
-                    <button
-                      onClick={() => handleUpdate(list.id)}
-                      className="action-btn edit-btn"
-                    >
-                      Save
-                    </button>
-                    <button
-                      onClick={() => setEditingId(null)}
-                      className="action-btn delete-btn"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div>
-                  <h3>{list.name}</h3>
-                  <p className="list-card-date">
-                    Created: {new Date(list.dateAdded).toLocaleDateString()}
-                  </p>
-                  <div className="card-actions">
-                    <Link
-                      to={`/lists/${list.id}`}
-                      className="action-btn btn-primary"
-                    >
-                      View Items
-                    </Link>
-                    <button
-                      onClick={() => {
-                        setEditingId(list.id);
-                        setEditingName(list.name);
-                      }}
-                      className="action-btn edit-btn"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => setDeleteId(list.id)}
-                      className="action-btn delete-btn"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              )}
+          ) : lists.length === 0 ? (
+            <div className="emptyState-Cont">
+              <div className="empty-Image-Cont">
+                <img src={emptyIcon} alt="No items found" />
+              </div>
+              <h1>No Lists yet, Add new list</h1>
+              <span></span>
             </div>
-          ))
-        )}
-      </div>
+          ) : (
+            lists.map((list) => (
+              <div key={list.id} className="list-card">
+                {editingId === list.id ? (
+                  <div>
+                    <input
+                      type="text"
+                      value={editingName}
+                      onChange={(e) => setEditingName(e.target.value)}
+                      className="edit-input"
+                      autoFocus
+                    />
+                    <div className="card-actions">
+                      <button
+                        onClick={() => handleUpdate(list.id)}
+                        className="action-btn edit-btn"
+                      >
+                        Save
+                      </button>
+                      <button
+                        onClick={() => setEditingId(null)}
+                        className="action-btn delete-btn"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <h3>{list.name}</h3>
+                    <p className="list-card-date">
+                      Created: {new Date(list.dateAdded).toLocaleDateString()}
+                    </p>
+                    <div className="card-actions">
+                      <Link
+                        to={`/lists/${list.id}`}
+                        className="action-btn btn-primary"
+                      >
+                        View Items
+                      </Link>
+                      <button
+                        onClick={() => {
+                          setEditingId(list.id);
+                          setEditingName(list.name);
+                        }}
+                        className="action-btn edit-btn"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => setDeleteId(list.id)}
+                        className="action-btn delete-btn"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))
+          )}
+        </div>
       </main>
 
       {toast && <Toast message={toast} onClose={() => setToast(null)} />}
