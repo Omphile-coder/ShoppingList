@@ -62,7 +62,16 @@ const HomePage = () => {
 
   const handleCreateList = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newListName.trim() || !currentUser) return;
+
+    if (!newListName.trim()) {
+      showToast("Please enter a list name before adding a list.", "error");
+      return;
+    }
+
+    if (!currentUser) {
+      showToast("Please log in before creating a shopping list.", "error");
+      return;
+    }
 
     try {
       const newList = await createShopppingList({

@@ -219,10 +219,7 @@ export const ShoppingListDetails = () => {
       showToast("Shopping item updated successfully!", "success");
     } catch (error) {
       console.error("Failed to update item", error);
-      showToast(
-        "Failed to update the shopping item. Please try again.",
-        "error",
-      );
+      showToast("Failed to update the shopping item. Please try again.", "error");
     }
   };
 
@@ -244,10 +241,7 @@ export const ShoppingListDetails = () => {
       showToast("Shopping item deleted successfully!", "success");
     } catch (error) {
       console.error("Failed to delete item", error);
-      showToast(
-        "Failed to delete the shopping item. Please try again.",
-        "error",
-      );
+      showToast("Failed to delete the shopping item. Please try again.", "error");
     } finally {
       setIsDeleting(false);
     }
@@ -562,6 +556,7 @@ export const ShoppingListDetails = () => {
           )}
         </div>
       </main>
+
 
       {deleteId && (
         <ConfirmOverlay

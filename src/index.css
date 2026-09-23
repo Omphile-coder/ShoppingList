@@ -257,6 +257,15 @@ HOME PAGE
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
 }
 
+.item-card-image {
+  display: block;
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
 .list-card h3 {
   margin-bottom: 4px;
   color: var(--text-main);
@@ -801,5 +810,89 @@ HOME PAGE
   .confirm-actions .action-btn {
     width: 100%;
     padding: 10px 12px;
+  }
+}
+
+/* Unsplash image picker inside the Add Item modal */
+.image-picker {
+  width: 100%;
+}
+
+.selected-item-image {
+  display: block;
+  width: 96px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin: 8px 0 10px;
+}
+
+.image-picker-results {
+  margin-top: 10px;
+  max-height: 300px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--background-color, #fff);
+}
+
+.image-results-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.image-result-btn {
+  display: block;
+  width: 100%;
+  height: 72px;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 7px;
+  cursor: pointer;
+  background: transparent;
+}
+
+.image-result-btn img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-result-btn:hover img {
+  transform: scale(1.03);
+}
+
+.image-credit {
+  display: block;
+  margin-top: 3px;
+  font-size: 0.7rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Keep the Add Item popup usable when the image picker has many results. */
+.modal-content {
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+@media (max-width: 600px) {
+  .modal-content {
+    max-height: 92vh;
+    padding: 20px;
+  }
+
+  .image-results-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .image-result-btn {
+    height: 68px;
   }
 }
