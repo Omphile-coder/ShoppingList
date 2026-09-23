@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useGetImagesQuery } from "../api/imageApi";
 
+// Defines the expected props, including the current image URL (value) and the callback to update it (onChange)
 type Props = {
   label: string;
   searchHint: string;
@@ -16,10 +17,12 @@ export function UnsplashImagePicker({
   disabled,
   onChange,
 }: Props) {
+  // Manages the visibility of the search UI and separates the input text (term) from the active API search (query)
   const [open, setOpen] = useState(false);
   const [term, setTerm] = useState("");
   const [query, setQuery] = useState("");
 
+  // Fetches images from Unsplash, skipping the request if the picker is closed or the query is empty
   const { currentData, isFetching, isError, refetch } = useGetImagesQuery(
     query,
     {
@@ -27,6 +30,7 @@ export function UnsplashImagePicker({
     },
   );
 
+  // Triggers a new search or forces a refetch if the user searches for the exact same term again
   const search = () => {
     const next = term.trim();
     if (!next) return;
@@ -38,9 +42,11 @@ export function UnsplashImagePicker({
     <div className="image-picker">
       <p className="control-label">{label}</p>
 
+      {/* Displays the currently selected image if one has been chosen */}
       {value && <img src={value} alt={label} className="selected-item-image" />}
 
       <div className="image-picker-actions">
+        {/* Opens the image search UI and pre-fills the input with a helpful hint based on the item */}
         <button
           type="button"
           className="action-btn edit-btn"
@@ -67,6 +73,7 @@ export function UnsplashImagePicker({
         )}
       </div>
 
+      {/* Conditionally renders the search input and results grid when the picker is active */}
       {open && (
         <div className="image-picker-results">
           <div className="image-search-row">
@@ -101,6 +108,7 @@ export function UnsplashImagePicker({
             </button>
           </div>
 
+          {/* Handles various API states: Error, prompt to search, populated results grid, or no results found */}
           {isError ? (
             <p className="alert-error">
               Could not load images. Check your connection and try again.
@@ -111,6 +119,7 @@ export function UnsplashImagePicker({
             <div className="image-results-grid">
               {currentData.results.map((photo) => (
                 <div key={photo.id}>
+                  {/* Updates the form state with the selected image URL and automatically closes the picker */}
                   <button
                     type="button"
                     className="image-result-btn"
@@ -142,6 +151,7 @@ export function UnsplashImagePicker({
             <p className="image-help">No images found. Try another search.</p>
           )}
 
+          {/* Required attribution link to comply with Unsplash API usage guidelines */}
           <a
             href="https://unsplash.com/?utm_source=shopping_list_app&utm_medium=referral"
             target="_blank"

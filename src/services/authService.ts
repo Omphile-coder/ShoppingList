@@ -1,6 +1,7 @@
 import api from "./api";
 import { encryptData } from "../utils/encryption";
 
+// Defines the TypeScript interfaces for the expected registration input and the user records returned by the API
 export interface RegisterData {
   email: string;
   password: string;
@@ -19,6 +20,7 @@ export interface User {
   password?: string;
 }
 
+// Secures the user's password and normalizes their email address before creating a new account via the API
 export const registerUser = async (userData: RegisterData) => {
   const encryptedPassword = encryptData(userData.password);
   const formattedEmail = userData.email.trim().toLowerCase();
@@ -32,6 +34,7 @@ export const registerUser = async (userData: RegisterData) => {
   return response.data;
 };
 
+// Queries the database to find an existing user by their email address, returning the match or null if not found
 export const getUserByEmail = async (email: string) => {
   const response = await api.get<User[]>("/users", {
     params: { email: email.trim().toLowerCase() },
@@ -40,6 +43,7 @@ export const getUserByEmail = async (email: string) => {
   return response.data.length > 0 ? response.data[0] : null;
 };
 
+// Sends a PATCH request to selectively update specific fields (like name or password) on an existing user's profile
 export const updateUser = async (
   id: string,
   userData: Partial<RegisterData>,

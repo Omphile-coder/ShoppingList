@@ -8,9 +8,11 @@ import { useToast } from "../components/ToastContext";
 export const ProfilePage = () => {
   const dispatch = useAppDispatch();
   const { showToast } = useToast();
+  
+  // Retrieves the logged-in user from Redux to pre-fill the profile fields
   const currentUser = useAppSelector((state) => state.auth.currentUser);
 
-  // Personal info state
+  // Manages the toggle state and form inputs for updating the user's personal details
   const [isEditingInfo, setIsEditingInfo] = useState(false);
   const [infoForm, setInfoForm] = useState({
     name: currentUser?.name || "",
@@ -19,21 +21,21 @@ export const ProfilePage = () => {
     cellNumber: currentUser?.cellNumber || "",
   });
 
-  // password states
+  // Manages the toggle state and form inputs for the password change feature
   const [isEditingPassowrd, setIsEditingPassowrd] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-
   if (!currentUser) return null;
 
-  // Updating personal info
+  // Validates email uniqueness before updating the user's details in the database and syncing the Redux store
   const handleUpdateInfo = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
       const normalizedEmail = infoForm.email.trim().toLowerCase();
 
+      // Check if the user is trying to change their email to one that is already taken
       if (normalizedEmail !== currentUser.email) {
         const existing = await getUserByEmail(normalizedEmail);
 
@@ -48,7 +50,7 @@ export const ProfilePage = () => {
         email: normalizedEmail,
       });
 
-      //Update the redux state now
+      // Update the Redux state with the fresh data and close the editing form
       dispatch(login(updatedUser));
       showToast("Profile updated successfully!", "success");
       setIsEditingInfo(false);
@@ -58,8 +60,7 @@ export const ProfilePage = () => {
     }
   };
 
-  // Updating password
-
+  // Verifies that the new passwords match, encrypts the input, and securely updates the database
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -75,6 +76,7 @@ export const ProfilePage = () => {
         password: encryptedPassword,
       });
 
+      // Securely strip the password from the payload before sending the updated user back to Redux
       const { password: _, ...safeUser } = updatedUser;
       dispatch(login(safeUser));
 
@@ -115,6 +117,7 @@ export const ProfilePage = () => {
           )}
         </div>
 
+        {/* Dynamically toggles between a read-only view of the user's info and an editable form */}
         {!isEditingInfo ? (
           <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
             <p>
@@ -221,6 +224,7 @@ export const ProfilePage = () => {
           )}
         </div>
 
+        {/* Renders the password change form with strict minimum length requirements */}
         {isEditingPassowrd && (
           <form onSubmit={handleUpdatePassword} className="auth-form">
             <label htmlFor="new-password" className="input-label">

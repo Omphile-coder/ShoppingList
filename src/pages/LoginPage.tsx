@@ -8,6 +8,7 @@ import listIcon from "../assets/ListIcon.webp";
 import { useToast } from "../components/ToastContext";
 
 export const LoginPage = () => {
+  // Initializes routing, Redux dispatch, and toast notifications, along with local state for form inputs
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { showToast } = useToast();
@@ -16,19 +17,21 @@ export const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  // Handles the login process by validating credentials against the database and managing loading states
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      //   Fetch the user from the database
+      // Fetch the user from the database based on the provided email address
       const user = await getUserByEmail(email);
 
       if (!user) {
         showToast("Invalid email or password.", "error");
         return;
       }
-      //   Decrypt the password stored in the database
+      
+      // Decrypt the password stored in the database to prepare for comparison
       if (!user.password) {
         showToast("Invalid email or password.", "error");
         return;
@@ -36,17 +39,17 @@ export const LoginPage = () => {
 
       const decryptedPassword = decryptData(user.password);
 
-      //   Compare the encrypted password to what the user just typed
+      // Compare the decrypted database password to what the user just typed in the form
       if (decryptedPassword !== password) {
         showToast("Invalid email or password.", "error");
         return;
       }
 
-      //   If they match, tell Redux that the user is logged in!
+      // If they match, securely strip the password from the object before saving the user to the Redux store
       const { password: _, ...safeUser } = user;
       dispatch(login(safeUser));
 
-      //   Go back to the homepage
+      // Redirect the authenticated user back to the homepage
       navigate("/");
     } catch (err) {
       console.error("Login error:", err);
@@ -63,6 +66,7 @@ export const LoginPage = () => {
       </div>
       <h1>Welcome Back</h1>
 
+      {/* Renders the login form, disabling the submit button during API calls to prevent duplicate submissions */}
       <form onSubmit={handleSubmit} className="auth-form">
         <div className="input-group">
           <label htmlFor="email" className="input-label">

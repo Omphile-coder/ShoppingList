@@ -19,6 +19,7 @@ import emptyIcon from "../assets/EmptyState.webp";
 import { useToast } from "../components/ToastContext";
 
 const HomePage = () => {
+  // Retrieves global state and sets up local state for managing list creation, inline editing, and deletion
   const dispatch = useAppDispatch();
   const { showToast } = useToast();
   const currentUser = useAppSelector((state) => state.auth.currentUser);
@@ -31,7 +32,7 @@ const HomePage = () => {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Fetch lists when the page loads
+  // Fetches lists on mount, instantly displaying cached data for perceived performance while fetching fresh data in the background
   useEffect(() => {
     if (!currentUser) return;
 
@@ -60,6 +61,7 @@ const HomePage = () => {
     };
   }, [currentUser, dispatch]);
 
+  // Validates the input, sends the new list to the server, and updates the Redux store upon success
   const handleCreateList = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -89,6 +91,7 @@ const HomePage = () => {
     }
   };
 
+  // Saves the renamed list to the server, updates Redux, and manually synchronizes the local storage cache
   const handleUpdate = async (id: string) => {
     if (!editingName.trim()) {
       return;
@@ -116,6 +119,7 @@ const HomePage = () => {
     }
   };
 
+  // Removes the selected list globally and from the cache, while tracking the loading state for the confirmation modal
   const handleDelete = async () => {
     if (!deleteId) return;
 
@@ -139,8 +143,10 @@ const HomePage = () => {
       setIsDeleting(false);
     }
   };
+  
   return (
     <>
+      {/* Renders the main dashboard UI, automatically adjusting for loading, empty, and populated states */}
       <main className="dashboard-container">
         <div className="dashboard-header">
           <h1>My Shopping Lists</h1>
@@ -180,6 +186,7 @@ const HomePage = () => {
           ) : (
             lists.map((list) => (
               <div key={list.id} className="list-card">
+                {/* Dynamically toggles between an inline editing view and the standard read-only card view */}
                 {editingId === list.id ? (
                   <div>
                     <input
@@ -241,7 +248,7 @@ const HomePage = () => {
         </div>
       </main>
 
-
+      {/* Conditionally displays the reusable confirmation overlay when the user attempts to delete a list */}
       {deleteId && (
         <ConfirmOverlay
           title="Delete shopping list?"

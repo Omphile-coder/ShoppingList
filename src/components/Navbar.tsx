@@ -6,18 +6,21 @@ import ConfirmOverlay from "./ConfirmOverlay";
 import { User } from "lucide-react";
 
 export const Navbar = () => {
+  // Retrieves routing, Redux dispatch, and auth state, while managing the visibility of the logout modal
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
-  const [isLogoutConfirmationOpen, setIsLogoutConfirmationOpen] =
-    useState(false);
+  const [isLogoutConfirmationOpen, setIsLogoutConfirmationOpen] = useState(false);
 
+  // Ensures the confirmation modal is closed automatically if the authentication state changes
   useEffect(() => {
     setIsLogoutConfirmationOpen(false);
   }, [isAuthenticated]);
 
+  // Hides the navbar entirely so unauthenticated users don't see navigation controls
   if (!isAuthenticated) return null;
 
+  // Closes the modal, clears the user's session via Redux, and redirects them to the login page
   const handleLogout = () => {
     setIsLogoutConfirmationOpen(false);
     dispatch(logout());
@@ -42,6 +45,7 @@ export const Navbar = () => {
         </button>
       </div>
 
+      {/* Conditionally renders the reusable confirmation overlay when the user initiates a logout */}
       {isLogoutConfirmationOpen && (
         <ConfirmOverlay
           title="Log out?"

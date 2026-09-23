@@ -19,60 +19,23 @@ import ConfirmOverlay from "../components/ConfirmOverlay";
 import { UnsplashImagePicker } from "../components/UnsplashImagePicker";
 import { useToast } from "../components/ToastContext";
 
+// Defines keyword dictionaries for categories to help enforce logical item sorting
 const categoryKeywords: Record<string, string[]> = {
   Groceries: [
-    "milk",
-    "bread",
-    "cheese",
-    "egg",
-    "meat",
-    "chicken",
-    "beef",
-    "fish",
-    "fruit",
-    "vegetable",
-    "food",
-    "rice",
-    "pasta",
-    "water",
-    "juice",
-    "snack",
+    "milk", "bread", "cheese", "egg", "meat", "chicken", "beef", "fish", "fruit",
+    "vegetable", "food", "rice", "pasta", "water", "juice", "snack",
   ],
   Electronics: [
-    "phone",
-    "laptop",
-    "computer",
-    "tablet",
-    "charger",
-    "cable",
-    "headphone",
-    "earbud",
-    "camera",
-    "speaker",
-    "keyboard",
-    "mouse",
-    "monitor",
-    "television",
-    "tv",
-    "battery",
+    "phone", "laptop", "computer", "tablet", "charger", "cable", "headphone", "earbud",
+    "camera", "speaker", "keyboard", "mouse", "monitor", "television", "tv", "battery",
   ],
   Clothing: [
-    "shirt",
-    "t-shirt",
-    "jean",
-    "pant",
-    "dress",
-    "skirt",
-    "shoe",
-    "sock",
-    "coat",
-    "jacket",
-    "hat",
-    "belt",
-    "underwear",
+    "shirt", "t-shirt", "jean", "pant", "dress", "skirt", "shoe", "sock", "coat",
+    "jacket", "hat", "belt", "underwear",
   ],
 };
 
+// Validates that an item isn't accidentally placed in the wrong category based on the predefined keywords
 const itemFitsCategory = (itemName: string, category: string) => {
   const normalizedName = itemName.trim().toLowerCase();
   const matchingKeywords = categoryKeywords[category];
@@ -89,9 +52,9 @@ const itemFitsCategory = (itemName: string, category: string) => {
 };
 
 export const ShoppingListDetails = () => {
+  // Retrieves routing parameters, global Redux state, and toast notifications
   const { listId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
-
   const dispatch = useAppDispatch();
   const { showToast } = useToast();
   const items = useAppSelector((state) => state.shoppingItems.items);
@@ -99,36 +62,32 @@ export const ShoppingListDetails = () => {
 
   const currentList = lists.find((list) => list.id === listId);
 
-  // Overlay State
+  // Manages local UI states for the add modal, forms, loading indicators, and delete confirmations
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-
-  // Form State
   const [name, setName] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [category, setCategory] = useState("");
   const [image, setImage] = useState("");
 
-  // Edit State
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const [editQuantity, setEditQuantity] = useState(1);
   const [editCategory, setEditCategory] = useState("");
+  
   const [isLoading, setIsLoading] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isSavingItem, setIsSavingItem] = useState(false);
-  const [itemValidationError, setItemValidationError] = useState<string | null>(
-    null,
-  );
+  const [itemValidationError, setItemValidationError] = useState<string | null>(null);
 
-  // URL States
+  // Syncs search and sort filters with the URL parameters so they survive page reloads and can be shared
   const searchQuery = searchParams.get("search") || "";
   const sortValue = searchParams.get("sort") || "name";
 
+  // Fetches the items for this specific list on mount, instantly displaying cached data while fetching fresh data
   useEffect(() => {
     if (!listId) return;
 
-    // Show cached items instantly while the latest data loads.
     const cachedItems = getCachedShoppingItems(listId);
     dispatch(setItems(cachedItems));
     setIsLoading(cachedItems.length === 0);
@@ -151,6 +110,7 @@ export const ShoppingListDetails = () => {
     };
   }, [listId, dispatch]);
 
+  // Validates the category, saves the new item to the server, updates Redux, and resets the modal form
   const handleAddItem = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !category || !listId) return;
@@ -191,6 +151,7 @@ export const ShoppingListDetails = () => {
     }
   };
 
+  // Enforces category validation before updating an existing item in the database, Redux, and local cache
   const handleUpdateItem = async (id: string) => {
     if (!editName.trim() || !editCategory) return;
 
@@ -211,6 +172,7 @@ export const ShoppingListDetails = () => {
       dispatch(updateItem(updated));
       setEditingId(null);
       setItemValidationError(null);
+      
       const cached = getCachedShoppingItems(listId || updated.listId);
       localStorage.setItem(
         `shoppingItems:${listId || updated.listId}`,
@@ -223,6 +185,7 @@ export const ShoppingListDetails = () => {
     }
   };
 
+  // Removes the item globally and updates the local storage cache, utilizing loading states for the UI modal
   const handleDeleteItem = async () => {
     if (!deleteId) return;
 
@@ -247,6 +210,7 @@ export const ShoppingListDetails = () => {
     }
   };
 
+  // Updates the URL search parameters whenever the user interacts with the search input or sort dropdown
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newParams = new URLSearchParams(searchParams);
     if (e.target.value) {
@@ -263,6 +227,7 @@ export const ShoppingListDetails = () => {
     setSearchParams(newParams);
   };
 
+  // Memoizes the filtered and sorted list of items locally to avoid unnecessary recalculations on re-renders
   const displayedItems = useMemo(() => {
     let result = [...items];
 
@@ -408,6 +373,7 @@ export const ShoppingListDetails = () => {
                   </div>
                 </div>
 
+                {/* Reusable child component that fetches matching images from the Unsplash API */}
                 <UnsplashImagePicker
                   label="Item image (optional)"
                   searchHint={name}
@@ -467,6 +433,8 @@ export const ShoppingListDetails = () => {
                     className="item-card-image"
                   />
                 )}
+                
+                {/* Dynamically toggles between the inline edit form and the standard item card view */}
                 {editingId === item.id ? (
                   // EDIT MODE
                   <div>
@@ -557,7 +525,7 @@ export const ShoppingListDetails = () => {
         </div>
       </main>
 
-
+      {/* Renders the global confirmation modal when an item delete action is triggered */}
       {deleteId && (
         <ConfirmOverlay
           title="Delete shopping item?"

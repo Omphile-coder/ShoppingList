@@ -11,7 +11,7 @@ export const RegisterPage = () => {
   const navigate = useNavigate();
   const { showToast } = useToast();
 
-  // State to hold our form inputs
+  // Initializes state to track the user's input across all registration fields and manage the loading UI
   const [formData, setFormData] = useState<RegisterData>({
     name: "",
     surname: "",
@@ -22,6 +22,7 @@ export const RegisterPage = () => {
 
   const [isLoading, setIsLoading] = useState(false);
 
+  // Dynamically updates the corresponding field in the form state based on the input's name attribute
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
@@ -29,12 +30,13 @@ export const RegisterPage = () => {
     });
   };
 
+  // Handles form submission by checking for existing accounts before sending the new user data to the database
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      //   check if the email already in use
+      // Queries the database to prevent duplicate registrations with the same email address
       const existingUser = await getUserByEmail(formData.email);
 
       if (existingUser) {
@@ -42,10 +44,10 @@ export const RegisterPage = () => {
         return;
       }
 
-      //   register the user
+      // Securely registers the new user in the database
       await registerUser(formData);
 
-      //   Show success message and redirects to login
+      // Notifies the user of success and routes them to the login page to authenticate
       showToast("Account created! Redirecting to login...", "success");
       navigate("/login");
     } catch (err) {
@@ -60,6 +62,7 @@ export const RegisterPage = () => {
     <main className="auth-container register-container">
       <h1>Create Account</h1>
 
+      {/* Renders the registration form, linking inputs to the state and disabling submission while loading */}
       <form onSubmit={handleSubmit} className="auth-form register-form">
         <div className="input-group">
           <label htmlFor="name" className="input-label">
