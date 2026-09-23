@@ -14,12 +14,13 @@ import {
   deleteShoppingList,
 } from "../services/shoppingListService";
 import { Link } from "react-router-dom";
-import Toast from "../components/Toast";
 import ConfirmOverlay from "../components/ConfirmOverlay";
 import emptyIcon from "../assets/EmptyState.webp";
+import { useToast } from "../components/ToastContext";
 
 const HomePage = () => {
   const dispatch = useAppDispatch();
+  const { showToast } = useToast();
   const currentUser = useAppSelector((state) => state.auth.currentUser);
   const lists = useAppSelector((state) => state.shoppingLists.lists);
 
@@ -27,7 +28,6 @@ const HomePage = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -47,7 +47,10 @@ const HomePage = () => {
       .then((data) => {
         if (!cancelled) dispatch(setLists(data));
       })
-      .catch((error) => console.error("Failed to load shopping lists", error))
+      .catch((error) => {
+        console.error("Failed to load shopping lists", error);
+        showToast("Failed to load your shopping lists. Please try again.", "error");
+      })
       .finally(() => {
         if (!cancelled) setIsLoading(false);
       });
@@ -70,9 +73,10 @@ const HomePage = () => {
 
       dispatch(addList(newList));
       setNewListName("");
-      setToast("Shopping list added successfully!");
+      showToast("Shopping list added successfully!", "success");
     } catch (error) {
       console.error("Failed to create list", error);
+      showToast("Failed to add the shopping list. Please try again.", "error");
     }
   };
 
@@ -96,9 +100,10 @@ const HomePage = () => {
           ),
         );
       }
-      setToast("Shopping list updated successfully!");
+      showToast("Shopping list updated successfully!", "success");
     } catch (error) {
       console.error("failed to update list", error);
+      showToast("Failed to update the shopping list. Please try again.", "error");
     }
   };
 
@@ -117,9 +122,10 @@ const HomePage = () => {
         );
       }
       setDeleteId(null);
-      setToast("Shopping list deleted successfully!");
+      showToast("Shopping list deleted successfully!", "success");
     } catch (error) {
       console.error("Failed to delete list", error);
+      showToast("Failed to delete the shopping list. Please try again.", "error");
     } finally {
       setIsDeleting(false);
     }
@@ -226,7 +232,6 @@ const HomePage = () => {
         </div>
       </main>
 
-      {toast && <Toast message={toast} onClose={() => setToast(null)} />}
 
       {deleteId && (
         <ConfirmOverlay

@@ -5,19 +5,19 @@ import { getUserByEmail } from "../services/authService";
 import { decryptData } from "../utils/encryption";
 import { login } from "../features/auth/authSlice";
 import listIcon from "../assets/ListIcon.webp";
+import { useToast } from "../components/ToastContext";
 
 export const LoginPage = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const { showToast } = useToast();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
     setIsLoading(true);
 
     try {
@@ -25,15 +25,20 @@ export const LoginPage = () => {
       const user = await getUserByEmail(email);
 
       if (!user) {
-        setError("Invalid email or password.");
+        showToast("Invalid email or password.", "error");
         return;
       }
       //   Decrypt the password stored in the database
+      if (!user.password) {
+        showToast("Invalid email or password.", "error");
+        return;
+      }
+
       const decryptedPassword = decryptData(user.password);
 
       //   Compare the encrypted password to what the user just typed
       if (decryptedPassword !== password) {
-        setError("Invalid email or password.");
+        showToast("Invalid email or password.", "error");
         return;
       }
 
@@ -45,7 +50,7 @@ export const LoginPage = () => {
       navigate("/");
     } catch (err) {
       console.error("Login error:", err);
-      setError("Something went wrong while logging in. Please try again.");
+      showToast("Something went wrong while logging in. Please try again.", "error");
     } finally {
       setIsLoading(false);
     }
@@ -57,8 +62,6 @@ export const LoginPage = () => {
         <img src={listIcon} alt="" />
       </div>
       <h1>Welcome Back</h1>
-
-      {error && <p className="alert-error">{error}</p>}
 
       <form onSubmit={handleSubmit} className="auth-form">
         <div className="input-group">

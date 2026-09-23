@@ -15,9 +15,9 @@ import {
   updateItem,
 } from "../features/shoppingLists/shoppingItemSlice";
 import emptyIcon from "../assets/EmptyState.webp";
-import Toast from "../components/Toast";
 import ConfirmOverlay from "../components/ConfirmOverlay";
 import { UnsplashImagePicker } from "../components/UnsplashImagePicker";
+import { useToast } from "../components/ToastContext";
 
 const categoryKeywords: Record<string, string[]> = {
   Groceries: [
@@ -93,6 +93,7 @@ export const ShoppingListDetails = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const dispatch = useAppDispatch();
+  const { showToast } = useToast();
   const items = useAppSelector((state) => state.shoppingItems.items);
   const lists = useAppSelector((state) => state.shoppingLists.lists);
 
@@ -113,7 +114,6 @@ export const ShoppingListDetails = () => {
   const [editQuantity, setEditQuantity] = useState(1);
   const [editCategory, setEditCategory] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isSavingItem, setIsSavingItem] = useState(false);
@@ -138,7 +138,10 @@ export const ShoppingListDetails = () => {
       .then((data) => {
         if (!cancelled) dispatch(setItems(data));
       })
-      .catch((error) => console.error("Failed to load shopping items", error))
+      .catch((error) => {
+        console.error("Failed to load shopping items", error);
+        showToast("Failed to load shopping items. Please try again.", "error");
+      })
       .finally(() => {
         if (!cancelled) setIsLoading(false);
       });
@@ -179,9 +182,10 @@ export const ShoppingListDetails = () => {
       setImage("");
       setItemValidationError(null);
       setIsAddModalOpen(false);
-      setToast("Shopping item added successfully!");
+      showToast("Shopping item added successfully!", "success");
     } catch (error) {
       console.error("Failed to add item", error);
+      showToast("Failed to add the shopping item. Please try again.", "error");
     } finally {
       setIsSavingItem(false);
     }
@@ -191,8 +195,9 @@ export const ShoppingListDetails = () => {
     if (!editName.trim() || !editCategory) return;
 
     if (!itemFitsCategory(editName, editCategory)) {
-      setToast(
+      showToast(
         `"${editName.trim()}" does not fit the ${editCategory} category.`,
+        "error",
       );
       return;
     }
@@ -211,9 +216,13 @@ export const ShoppingListDetails = () => {
         `shoppingItems:${listId || updated.listId}`,
         JSON.stringify(cached.map((item) => (item.id === id ? updated : item))),
       );
-      setToast("Shopping item updated successfully!");
+      showToast("Shopping item updated successfully!", "success");
     } catch (error) {
       console.error("Failed to update item", error);
+      showToast(
+        "Failed to update the shopping item. Please try again.",
+        "error",
+      );
     }
   };
 
@@ -232,9 +241,13 @@ export const ShoppingListDetails = () => {
         );
       }
       setDeleteId(null);
-      setToast("Shopping item deleted successfully!");
+      showToast("Shopping item deleted successfully!", "success");
     } catch (error) {
       console.error("Failed to delete item", error);
+      showToast(
+        "Failed to delete the shopping item. Please try again.",
+        "error",
+      );
     } finally {
       setIsDeleting(false);
     }
@@ -549,10 +562,6 @@ export const ShoppingListDetails = () => {
           )}
         </div>
       </main>
-
-      {toast !== null && (
-        <Toast message={toast} onClose={() => setToast(null)} />
-      )}
 
       {deleteId && (
         <ConfirmOverlay

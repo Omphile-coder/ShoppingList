@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useToast } from "../components/ToastContext";
 import {
   getUserByEmail,
   registerUser,
@@ -8,6 +9,7 @@ import {
 
 export const RegisterPage = () => {
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   // State to hold our form inputs
   const [formData, setFormData] = useState<RegisterData>({
@@ -18,8 +20,6 @@ export const RegisterPage = () => {
     password: "",
   });
 
-  const [error, setError] = useState("");
-  const [success, setSucess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -31,8 +31,6 @@ export const RegisterPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setSucess("");
     setIsLoading(true);
 
     try {
@@ -40,7 +38,7 @@ export const RegisterPage = () => {
       const existingUser = await getUserByEmail(formData.email);
 
       if (existingUser) {
-        setError("An account with this email already exists.");
+        showToast("An account with this email already exists.", "error");
         return;
       }
 
@@ -48,11 +46,11 @@ export const RegisterPage = () => {
       await registerUser(formData);
 
       //   Show success message and redirects to login
-      setSucess("Account created! Redirecting to login...");
+      showToast("Account created! Redirecting to login...", "success");
       navigate("/login");
     } catch (err) {
       console.error(err);
-      setError("Something went wrong during registration. Please try again.");
+      showToast("Something went wrong during registration. Please try again.", "error");
     } finally {
       setIsLoading(false);
     }
@@ -61,9 +59,6 @@ export const RegisterPage = () => {
   return (
     <main className="auth-container register-container">
       <h1>Create Account</h1>
-
-      {error && <p className="alert-error">{error}</p>}
-      {success && <p className="alert-success">{success}</p>}
 
       <form onSubmit={handleSubmit} className="auth-form register-form">
         <div className="input-group">

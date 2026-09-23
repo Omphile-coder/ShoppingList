@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { logout } from "../features/auth/authSlice";
@@ -11,9 +11,15 @@ export const Navbar = () => {
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
   const [isLogoutConfirmationOpen, setIsLogoutConfirmationOpen] =
     useState(false);
+
+  useEffect(() => {
+    setIsLogoutConfirmationOpen(false);
+  }, [isAuthenticated]);
+
   if (!isAuthenticated) return null;
 
   const handleLogout = () => {
+    setIsLogoutConfirmationOpen(false);
     dispatch(logout());
     navigate("/login");
   };

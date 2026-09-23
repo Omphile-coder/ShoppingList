@@ -3,9 +3,11 @@ import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { getUserByEmail, updateUser } from "../services/authService";
 import { login } from "../features/auth/authSlice";
 import { encryptData } from "../utils/encryption";
+import { useToast } from "../components/ToastContext";
 
 export const ProfilePage = () => {
   const dispatch = useAppDispatch();
+  const { showToast } = useToast();
   const currentUser = useAppSelector((state) => state.auth.currentUser);
 
   // Personal info state
@@ -22,16 +24,12 @@ export const ProfilePage = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
 
   if (!currentUser) return null;
 
   // Updating personal info
   const handleUpdateInfo = async (e: React.FormEvent) => {
     e.preventDefault();
-    setMessage("");
-    setError("");
 
     try {
       const normalizedEmail = infoForm.email.trim().toLowerCase();
@@ -40,7 +38,7 @@ export const ProfilePage = () => {
         const existing = await getUserByEmail(normalizedEmail);
 
         if (existing) {
-          setError("That email is already in use by another account.");
+          showToast("That email is already in use by another account.", "error");
           return;
         }
       }
@@ -52,11 +50,11 @@ export const ProfilePage = () => {
 
       //Update the redux state now
       dispatch(login(updatedUser));
-      setMessage("Profile updated successfully!");
+      showToast("Profile updated successfully!", "success");
       setIsEditingInfo(false);
     } catch (err) {
       console.error(err);
-      setError("Failed to update profile");
+      showToast("Failed to update profile. Please try again.", "error");
     }
   };
 
@@ -64,11 +62,9 @@ export const ProfilePage = () => {
 
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    setMessage("");
-    setError("");
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      showToast("Passwords do not match.", "error");
       return;
     }
 
@@ -82,13 +78,13 @@ export const ProfilePage = () => {
       const { password: _, ...safeUser } = updatedUser;
       dispatch(login(safeUser));
 
-      setMessage("Password updated securely!");
+      showToast("Password updated securely!", "success");
       setIsEditingPassowrd(false);
       setPassword("");
       setConfirmPassword("");
     } catch (err) {
       console.error(err);
-      setError("Failed to update password.");
+      showToast("Failed to update password. Please try again.", "error");
     }
   };
 
@@ -97,9 +93,6 @@ export const ProfilePage = () => {
       <div className="dashboard-header">
         <h1>My Profile</h1>
       </div>
-
-      {message && <p className="alert-success">{message}</p>}
-      {error && <p className="alert-error">{error}</p>}
 
       {/* SECTION 1: Personal Information */}
       <div className="item-form-container">
