@@ -9,8 +9,11 @@ interface AuthState {
 
 // Safely attempts to retrieve the persisted user session from local storage to maintain login state across page reloads
 const getStoredUser = (): Omit<User, "password"> | null => {
+  if (typeof window === "undefined") return null;
+
   try {
-    return JSON.parse(localStorage.getItem("shoppingListUser") || "null");
+    const stored = localStorage.getItem("shoppingListUser");
+    return stored ? JSON.parse(stored) : null;
   } catch {
     return null;
   }
@@ -32,13 +35,19 @@ const authSlice = createSlice({
     login: (state, action: PayloadAction<Omit<User, "password">>) => {
       state.isAuthenticated = true;
       state.currentUser = action.payload;
-      localStorage.setItem("shoppingListUser", JSON.stringify(action.payload));
+
+      if (typeof window !== "undefined") {
+        localStorage.setItem("shoppingListUser", JSON.stringify(action.payload));
+      }
     },
     // Clears the user from both Redux state and local storage when logging out
     logout: (state) => {
       state.isAuthenticated = false;
       state.currentUser = null;
-      localStorage.removeItem("shoppingListUser");
+
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("shoppingListUser");
+      }
     },
   },
 });
