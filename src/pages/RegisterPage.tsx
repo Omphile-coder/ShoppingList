@@ -62,7 +62,6 @@ export const RegisterPage = () => {
     <main className="auth-container register-container">
       <h1>Create Account</h1>
 
-      {/* Renders the registration form, linking inputs to the state and disabling submission while loading */}
       <form onSubmit={handleSubmit} className="auth-form register-form">
         <div className="input-group">
           <label htmlFor="name" className="input-label">
@@ -74,6 +73,7 @@ export const RegisterPage = () => {
             type="text"
             placeholder="Name"
             required
+            value={formData.name}
             onChange={handleChange}
             className="auth-input"
           />
@@ -89,6 +89,7 @@ export const RegisterPage = () => {
             type="text"
             placeholder="Surname"
             required
+            value={formData.surname}
             onChange={handleChange}
             className="auth-input"
           />
@@ -104,6 +105,7 @@ export const RegisterPage = () => {
             type="email"
             placeholder="Email"
             required
+            value={formData.email}
             onChange={handleChange}
             className="auth-input"
           />
@@ -119,6 +121,7 @@ export const RegisterPage = () => {
             type="tel"
             placeholder="Cell Number"
             required
+            value={formData.cellNumber}
             onChange={handleChange}
             className="auth-input"
           />
@@ -135,6 +138,7 @@ export const RegisterPage = () => {
             placeholder="Password"
             minLength={8}
             required
+            value={formData.password}
             onChange={handleChange}
             className="auth-input"
           />
