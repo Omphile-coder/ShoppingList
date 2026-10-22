@@ -16,7 +16,6 @@ export interface User {
   name: string;
   surname: string;
   cellNumber?: string;
-  cellnumber?: string;
   password?: string;
 }
 
@@ -33,6 +32,7 @@ export const registerUser = async (userData: RegisterData) => {
 
   return response.data;
 };
+
 
 // Queries the database to find an existing user by their email address, returning the match or null if not found
 export const getUserByEmail = async (email: string) => {
