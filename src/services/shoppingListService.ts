@@ -33,7 +33,7 @@ export const getShoppingLists = async (userId: string) => {
 };
 
 // Submits a newly created shopping list to the API and safely appends the response to the existing local cache
-export const createShopppingList = async (
+export const createShoppingList = async (
   listData: Omit<ShoppingList, "id">,
 ) => {
   const response = await api.post<ShoppingList>("/shoppingLists", listData);
@@ -48,10 +48,27 @@ export const updateShoppingList = async (
   listData: Partial<ShoppingList>,
 ): Promise<ShoppingList> => {
   const response = await api.patch<ShoppingList>(`/shoppingLists/${id}`, listData);
+
+  if (listData.userId) {
+    const lists = getCachedShoppingLists(listData.userId);
+    const updatedLists = lists.map((list) =>
+      list.id === id ? { ...list, ...response.data } : list,
+    );
+    saveCachedShoppingLists(listData.userId, updatedLists);
+  }
+
   return response.data;
 };
 
 // Permanently removes a shopping list from the database using its unique ID
-export const deleteShoppingList = async (id: string) => {
+export const deleteShoppingList = async (id: string, userId?: string) => {
   await api.delete(`/shoppingLists/${id}`);
+
+  if (userId) {
+    const lists = getCachedShoppingLists(userId);
+    saveCachedShoppingLists(
+      userId,
+      lists.filter((list) => list.id !== id),
+    );
+  }
 };
