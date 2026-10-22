@@ -37,9 +37,7 @@ export const getShoppingItems = async (listId: string) => {
 };
 
 // Submits a newly created item to the API and safely appends the response to the existing local cache
-export const createShoppingItem = async (
-  item: Omit<ShoppingItem, "id">,
-) => {
+export const createShoppingItem = async (item: Omit<ShoppingItem, "id">) => {
   const response = await api.post<ShoppingItem>("/shoppingItems", item);
   const items = getCachedShoppingItems(item.listId);
   saveCachedShoppingItems(item.listId, [...items, response.data]);
@@ -52,10 +50,27 @@ export const updateShoppingItem = async (
   itemData: Partial<ShoppingItem>,
 ) => {
   const response = await api.patch<ShoppingItem>(`/shoppingItems/${id}`, itemData);
+
+  if (itemData.listId) {
+    const items = getCachedShoppingItems(itemData.listId);
+    const updatedItems = items.map((item) =>
+      item.id === id ? { ...item, ...response.data } : item,
+    );
+    saveCachedShoppingItems(itemData.listId, updatedItems);
+  }
+
   return response.data;
 };
 
 // Removes an item from the database using its unique ID
-export const deleteShoppingItem = async (id: string) => {
+export const deleteShoppingItem = async (id: string, listId?: string) => {
   await api.delete(`/shoppingItems/${id}`);
+
+  if (listId) {
+    const items = getCachedShoppingItems(listId);
+    saveCachedShoppingItems(
+      listId,
+      items.filter((item) => item.id !== id),
+    );
+  }
 };
