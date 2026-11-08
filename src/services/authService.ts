@@ -50,7 +50,12 @@ export const getUserByEmail = async (email: string) => {
     params: { email: email.trim().toLowerCase() },
   });
 
-  return response.data.length > 0 ? response.data[0] : null;
+  // A routing error can return an HTML page with status 200 instead of JSON.
+  if (!Array.isArray(response.data)) {
+    throw new Error("Expected a JSON array from the user lookup.");
+  }
+
+  return response.data[0] ?? null;
 };
 
 // Sends a PATCH request to selectively update specific fields (like name or password) on an existing user's profile
