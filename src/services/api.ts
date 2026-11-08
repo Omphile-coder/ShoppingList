@@ -1,12 +1,9 @@
 import axios from "axios";
 
-// This points to Render deployment
+// Vite proxies local requests. Vercel uses the Render URL set at build time.
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL, 
-    headers: {
-        "Content-Type": "application/json",
-    },
-    timeout: 10000, 
+  baseURL: import.meta.env.DEV ? "/api" : import.meta.env.VITE_API_URL?.trim() || "/api",
+  timeout: 60_000,
 });
 
 export default api;
