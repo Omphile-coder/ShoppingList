@@ -1,7 +1,7 @@
 {
   "rewrites": [
-    { "source": "/api/:path*", "destination": "https://shoppinglist-xbdp.onrender.com/:path*" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/api/:path((?!unsplash(?:/|$)).*)", "destination": "https://shoppinglist-xbdp.onrender.com/:path*" },
+    { "source": "/:path((?!api(?:/|$)).*)", "destination": "/index.html" }
   ],
   "headers": [
     {

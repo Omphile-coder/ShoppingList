@@ -13,7 +13,7 @@ npm ci
 npm run dev
 ```
 
-Open http://localhost:5173. Vite proxies API calls to JSON Server on port 8000. Use `npm start` to run only the API. On first start the launcher creates `data/db.json` from the empty seed. Existing local data stays in place. Set `DB_FILE` to use a different database path. The optional `VITE_UNSPLASH_ACCESS_KEY` enables Unsplash search; you can also paste an image URL.
+Open http://localhost:5173. Vite proxies API calls to JSON Server on port 8000. Use `npm start` to run only the API. On first start the launcher creates `data/db.json` from the empty seed. Existing local data stays in place. Set `DB_FILE` to use a different database path. The optional `UNSPLASH_ACCESS_KEY` enables Unsplash search; you can also paste an image URL.
 
 If port 8000 is in use, stop the other API or choose another port before running `npm run dev`. In PowerShell, set `$env:PORT = '8010'`. The launcher and Vite will both use that port for the API.
 
@@ -38,6 +38,8 @@ The launcher reads Render's `PORT` and binds on `0.0.0.0`. JSON Server is a runt
 Render's default filesystem is ephemeral. If existing remote data matters, back it up before redeploying. To retain new records through deploys, use a Render plan that supports [persistent disks](https://render.com/docs/disks), mount one at `/var/data`, and set `DB_FILE=/var/data/db.json`. Copy any existing data to that file before switching; the launcher only creates a seed when the file is missing.
 
 For Vercel, set `VITE_API_URL` to the working Render HTTPS URL and redeploy the frontend. `vercel.json` makes direct visits and refreshes on routes such as `/lists/:id` work.
+
+For photo search, set UNSPLASH_ACCESS_KEY as a Secret in Vercel. Use the Access Key from your Unsplash app. WeShop calls Unsplash from a server function.
 
 ## Course demo and data
 

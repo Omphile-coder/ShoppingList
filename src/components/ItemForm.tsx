@@ -66,9 +66,7 @@ export function ItemForm({ item, onSave, onClose }: {
             Notes (optional)
             <textarea className="auth-input" rows={2} value={notes} onChange={(event) => setNotes(event.target.value)} maxLength={500} />
           </label>
-          {import.meta.env.VITE_UNSPLASH_ACCESS_KEY && (
-            <UnsplashImagePicker label="Find a photo on Unsplash" searchHint={name} value={image} onChange={setImage} disabled={saving} />
-          )}
+          <UnsplashImagePicker label="Find a photo on Unsplash" searchHint={name} value={image} onChange={setImage} disabled={saving} />
           <label className="input-group">
             Image URL (optional)
             <input className="auth-input" type="url" value={image} onChange={(event) => setImage(event.target.value)} placeholder="https://…" />

@@ -113,7 +113,7 @@ export function UnsplashImagePicker({
           {/* Handles various API states: Error, prompt to search, populated results grid, or no results found */}
           {isError ? (
             <p className="alert-error">
-              Could not load images. Check your connection and try again.
+              Photo search is unavailable. Try again or paste an image URL.
             </p>
           ) : !query ? (
             <p className="image-help">Search Unsplash for a matching image.</p>
