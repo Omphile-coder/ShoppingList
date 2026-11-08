@@ -29,6 +29,13 @@ fieldset { border: 0; padding: 0; margin: 0; min-width: 0; display: grid; gap: 1
 .alert-error { color: var(--red); }
 .eyebrow { font-size: .75rem; font-weight: 750; letter-spacing: .12em; color: var(--green); }
 
+/* Center the auth card and let it scroll when the form is taller than the screen. */
+#root:has(> .auth-layout) {
+  min-height: 100dvh;
+  display: grid;
+  align-content: center;
+}
+
 /* The desktop auth story collapses to the brand above the form on phones. */
 .auth-layout {
   width: min(1050px, calc(100% - 40px));
