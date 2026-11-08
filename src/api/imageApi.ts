@@ -12,19 +12,17 @@ interface ImageSearchResponse {
   results: UnsplashImage[];
 }
 
-// Configures the RTK Query API slice, setting the Unsplash base URL for all requests
+// Sends searches to WeShop so the browser never receives the Unsplash key.
 export const imageApi = createApi({
   reducerPath: "imageApi",
-  baseQuery: fetchBaseQuery({ baseUrl: "https://api.unsplash.com" }),
+  baseQuery: fetchBaseQuery({ baseUrl: "/api" }),
   endpoints: (builder) => ({
-    // Defines the search endpoint that takes a search term and passes it along with your API key
+    // Passes only the search term to the server.
     getImages: builder.query<ImageSearchResponse, string>({
       query: (searchTerm) => ({
-        url: "search/photos",
+        url: "unsplash",
         params: {
           query: searchTerm,
-          client_id: import.meta.env.VITE_UNSPLASH_ACCESS_KEY,
-          per_page: 8, // Limits the results to 8 images per request
         },
       }),
     }),
