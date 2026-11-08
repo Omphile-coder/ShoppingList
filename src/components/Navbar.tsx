@@ -34,7 +34,7 @@ export function Navbar() {
           <button type="button" className="action-btn edit-btn" onClick={() => setConfirming(true)}>Sign out</button>
         </div>
       </div>
-      {confirming && <ConfirmOverlay title="Sign out?" message="You can sign back in to see your lists." confirmText="Sign out"
+      {confirming && <ConfirmOverlay title="Sign out?" message="You can sign back in to see your lists." confirmText="Sign out" centered
         onConfirm={handleLogout} onCancel={() => setConfirming(false)} />}
     </nav>
   );

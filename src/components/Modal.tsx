@@ -6,10 +6,11 @@ type ModalProps = {
   children: ReactNode;
   onClose: () => void;
   busy?: boolean;
+  className?: string;
 };
 
 // Uses a native dialog to keep keyboard focus inside add, edit, and share forms.
-export function Modal({ title, children, onClose, busy }: ModalProps) {
+export function Modal({ title, children, onClose, busy, className }: ModalProps) {
   const dialog = useRef<HTMLDialogElement>(null);
   const titleId = useId();
 
@@ -22,7 +23,7 @@ export function Modal({ title, children, onClose, busy }: ModalProps) {
   return (
     <dialog
       ref={dialog}
-      className="modal-content"
+      className={className ? "modal-content " + className : "modal-content"}
       aria-labelledby={titleId}
       onCancel={(event) => {
         event.preventDefault();

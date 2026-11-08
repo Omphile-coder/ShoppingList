@@ -214,6 +214,16 @@ textarea.auth-input { resize: vertical; }
 .modal-content::backdrop { background: rgb(20 37 27 / 58%); }
 .modal-header { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin-bottom: 14px; }
 .modal-header h2 { font-size: 1.35rem; }
+/* Center the sign-out confirmation while keeping the close button in the corner. */
+.confirmation-centered { text-align: center; }
+.confirmation-centered .modal-header {
+  position: relative;
+  justify-content: center;
+  padding-inline: 42px;
+  min-height: 34px;
+}
+.confirmation-centered .modal-header .icon-button { position: absolute; inset-inline-end: 0; }
+.confirmation-centered .card-actions { justify-content: center; }
 .share-preview { margin-top: 12px; }
 /* Keep the photo search and form actions visible without opening another panel. */
 .image-picker { display: grid; gap: 6px; }
