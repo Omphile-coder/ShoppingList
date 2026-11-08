@@ -66,16 +66,23 @@ export function ItemForm({ item, onSave, onClose }: {
             Notes (optional)
             <textarea className="auth-input" rows={2} value={notes} onChange={(event) => setNotes(event.target.value)} maxLength={500} />
           </label>
-          <UnsplashImagePicker label="Find a photo on Unsplash" searchHint={name} value={image} onChange={setImage} disabled={saving} />
-          <label className="input-group">
-            Image URL (optional)
-            <input className="auth-input" type="url" value={image} onChange={(event) => setImage(event.target.value)} placeholder="https://…" />
-          </label>
+          <UnsplashImagePicker value={image} onChange={setImage} disabled={saving} />
+          <details className="image-url-option">
+            <summary>Use an image URL</summary>
+            <label className="input-group">
+              Image URL (optional)
+              <input className="auth-input" inputMode="url" value={image}
+                onChange={(event) => setImage(event.target.value)} placeholder="https://example.com/photo.jpg" />
+            </label>
+          </details>
         </fieldset>
         {error && <p role="alert" className="alert-error">{error}</p>}
-        <button type="submit" className="auth-button" disabled={saving || !name.trim()}>
-          {saving ? "Saving…" : item ? "Save changes" : "Add to list"}
-        </button>
+        <div className="item-form-actions">
+          <button type="button" className="action-btn edit-btn" disabled={saving} onClick={onClose}>Cancel</button>
+          <button type="submit" className="action-btn btn-primary" disabled={saving || !name.trim()}>
+            {saving ? "Saving..." : item ? "Save changes" : "Add item"}
+          </button>
+        </div>
       </form>
     </Modal>
   );
