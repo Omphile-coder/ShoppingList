@@ -1,7 +1,6 @@
 # WeShop
 
-WeShop is a React and TypeScript shopping list app for CodeTribe Academy Task 4. Redux holds the current session, lists, and items. JSON Server stores records. This update takes inspiration from the supplied ShopBuddy reference while keeping the existing WeShop data model and using its own design.
-
+WeShop is a React and TypeScript shopping list app for CodeTribe Academy Task 4. Redux holds the current session, lists, and items. JSON Server stores records. 
 Create an account, make a named list, add items with a category, quantity, notes, and optional photo, then check them off as you shop. Search and sort settings appear in the list URL. **Share list** sends a text copy with a native share sheet or clipboard, so recipients can read it without an account.
 
 ## Preview
@@ -51,11 +50,3 @@ The assignment calls for reversible password encryption and JSON Server. The bro
 
 Keep `.env` and `data/db.json` local. If they were tracked in an older checkout, run `git rm --cached -- .env data/db.json` before committing this update; this keeps the local files and stops tracking them. If a real key was committed, rotate it.
 
-## Where the code lives
-
-- `src/pages`: login, registration, list dashboard, item detail, and profile screens.
-- `src/components`: shared navigation, dialogs, forms, and notifications.
-- `src/services`: calls to JSON Server and record types.
-- `src/features`: Redux session, list, and item state.
-- `scripts/start-server.mjs`: sets up the data file and starts the API.
-- `docs/PLAN.md`: design direction, steps, and app flow.
