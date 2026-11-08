@@ -4,6 +4,10 @@ WeShop is a React and TypeScript shopping list app for CodeTribe Academy Task 4.
 
 Create an account, make a named list, add items with a category, quantity, notes, and optional photo, then check them off as you shop. Search and sort settings appear in the list URL. **Share list** sends a text copy with a native share sheet or clipboard, so recipients can read it without an account.
 
+## Preview
+
+![WeShop sign-in screen](docs/weshop-preview.png)
+
 ## Run locally
 
 Use Node.js 24.14.0, then:
