@@ -10,6 +10,7 @@ type Props = {
   onChange: (url: string) => void;
 };
 
+// Searches for a photo and passes its URL back to the add or edit form.
 export function UnsplashImagePicker({
   label,
   searchHint,
@@ -80,6 +81,7 @@ export function UnsplashImagePicker({
             <input
               type="text"
               placeholder="Search for an item, e.g. apples"
+              aria-label="Search Unsplash"
               value={term}
               disabled={disabled}
               onChange={(event) => setTerm(event.target.value)}

@@ -1,84 +1,55 @@
-# ShopList Pro 🛒
+# WeShop
 
-A modern, responsive shopping list application built with React, TypeScript, and Redux. ShopList Pro allows users to securely manage their daily shopping needs with personalized accounts, dynamic filtering, and a clean, mobile-first interface.
+WeShop is a React and TypeScript shopping list app for CodeTribe Academy Task 4. Redux holds the current session, lists, and items. JSON Server stores records. This update takes inspiration from the supplied ShopBuddy reference while keeping the existing WeShop data model and using its own design.
 
-**Live Demo:** [ShopList Pro on Vercel](https://shopping-list-nine-indol.vercel.app/login)
+Create an account, make a named list, add items with a category, quantity, notes, and optional photo, then check them off as you shop. Search and sort settings appear in the list URL. **Share list** sends a text copy with a native share sheet or clipboard, so recipients can read it without an account.
 
-## Features
+## Run locally
 
-- **Secure Authentication:** User passwords are encrypted using `crypto-js` during registration and safely decrypted for verification upon login.
-- **Protected Routing:** Utilizes `react-router-dom` to ensure unauthenticated users cannot access the main dashboard, while logged-in users bypass the auth screens.
-- **Complete CRUD Operations:** Users can Create, Read, Update, and Delete multiple shopping lists and individual shopping items.
-- **Smart URL-Driven Filtering:** Search items by name and sort them by category or date. The search and sort parameters are synced directly to the URL (e.g., `?search=milk&sort=category`), allowing for easily shareable and bookmarkable views.
-- **Profile Management:** A dedicated profile dashboard where users can securely update their personal information and login credentials.
-- **Modern UX/UI:** Features a clean, minimalist design with floating action overlays (modals) for adding items and interactive empty states.
+Use Node.js 24.14.0, then:
 
-## Tech Stack
+```sh
+npm ci
+npm run dev
+```
 
-- **Frontend:** React (Vite), TypeScript, CSS3
-- **State Management:** Redux Toolkit (`react-redux`, `@reduxjs/toolkit`)
-- **Routing:** React Router DOM v6
-- **Backend/Database:** JSON Server (Mock REST API)
-- **Security:** CryptoJS (AES Encryption)
+Open http://localhost:5173. Vite proxies API calls to JSON Server on port 8000. Use `npm start` to run only the API. On first start the launcher creates `data/db.json` from the empty seed. Existing local data stays in place. Set `DB_FILE` to use a different database path. The optional `VITE_UNSPLASH_ACCESS_KEY` enables Unsplash search; you can also paste an image URL.
 
-## Installation & Setup
+If port 8000 is in use, stop the other API or choose another port before running `npm run dev`. In PowerShell, set `$env:PORT = '8010'`. The launcher and Vite will both use that port for the API.
 
-To run this project locally, you will need Node.js installed on your machine. This project requires two separate servers to run simultaneously: the Vite frontend and the JSON server backend.
+```sh
+npm run lint
+npm run build
+```
 
-1.  **Clone the repository:**
+## Fix the existing Render service
 
-    ```bash
-    git clone [https://github.com/Omphile-coder/shopping-list-app.git](https://github.com/Omphile-coder/shopping-list-app.git)
-    cd shopping-list-app
-    ```
+In the Render dashboard, select the existing **Web Service** and set its repository and branch to the reviewed version that contains this update. Use the repository root, with these settings:
 
-2.  **Install dependencies:**
+| Setting | Value |
+| --- | --- |
+| Runtime | Node |
+| Build Command | `npm ci --omit=dev` |
+| Start Command | `npm start` |
+| Health Check Path | `/` |
 
-    ```bash
+The launcher reads Render's `PORT` and binds on `0.0.0.0`. JSON Server is a runtime dependency, so omitting development tools still leaves the API installed. Check the deploy logs for `JSON Server started on PORT`, then open the service URL to verify it responds. See [Render Web Services](https://render.com/docs/web-services).
 
-    npm i
+Render's default filesystem is ephemeral. If existing remote data matters, back it up before redeploying. To retain new records through deploys, use a Render plan that supports [persistent disks](https://render.com/docs/disks), mount one at `/var/data`, and set `DB_FILE=/var/data/db.json`. Copy any existing data to that file before switching; the launcher only creates a seed when the file is missing.
 
-    ```
+For Vercel, set `VITE_API_URL` to the working Render HTTPS URL and redeploy the frontend. `vercel.json` makes direct visits and refreshes on routes such as `/lists/:id` work.
 
-3.  **Start the JSON Server (Backend):**
+## Course demo and data
 
-    ```bash
+The assignment calls for reversible password encryption and JSON Server. The browser encrypts credentials on registration and password changes and decrypts them at sign-in. The session stores profile fields only. The protected routes and owner checks apply in the browser. JSON Server has no server-side authorization, and the browser's encryption key is public. Use sample data and unique demo passwords.
 
-    npm run server
+Keep `.env` and `data/db.json` local. If they were tracked in an older checkout, run `git rm --cached -- .env data/db.json` before committing this update; this keeps the local files and stops tracking them. If a real key was committed, rotate it.
 
-    ```
+## Where the code lives
 
-4.  **Start the Vite Development Server (Frontend):**
-
-    ```bash
-
-    npm run dev
-    ```
-
-5.  **Open the App:**
-
-Navigate to http://localhost:5173 in your browser.
-
-## 📁 Project Structure
-
-src/
-
-├── assets/ # Images and static assets<br>
-├── components/ # Reusable UI components (Navbar, ProtectedRoutes)<br>
-├── features/ # Redux slices (authSlice, shoppingListsSlice, shoppingItemSlice)<br>
-├── pages/ # Full page views (Home, Login, Register, Profile, Details)<br>
-├── services/ # Axios API calls (authService, shoppingListService)<br>
-├── store/ # Redux store configuration and typed hooks<br>
-├── utils/ # Helper functions (encryption.ts)<br>
-├── App.tsx # Root component<br>
-└── index.css # Global design system and custom styling
-
-## Author
-
-Omphile Lucas
-
-GitHub: @Omphile-coder
-
-Developed for CodeTribe Academy Task 4
-
-
+- `src/pages`: login, registration, list dashboard, item detail, and profile screens.
+- `src/components`: shared navigation, dialogs, forms, and notifications.
+- `src/services`: calls to JSON Server and record types.
+- `src/features`: Redux session, list, and item state.
+- `scripts/start-server.mjs`: sets up the data file and starts the API.
+- `docs/PLAN.md`: design direction, steps, and app flow.

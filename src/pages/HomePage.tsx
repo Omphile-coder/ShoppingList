@@ -1,265 +1,129 @@
 import { useEffect, useState } from "react";
+import { ArrowUpRight, ListChecks, Plus } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { setLists, addList, updateList, deleteList } from "../features/shoppingLists/shoppingListsSlice";
 import {
-  setLists,
-  addList,
-  updateList,
-  deleteList,
-} from "../features/shoppingLists/shoppingListsSlice";
-import {
-  getShoppingLists,
-  getCachedShoppingLists,
-  createShopppingList,
-  updateShoppingList,
-  deleteShoppingList,
+  getShoppingLists, createShoppingList, renameShoppingList, deleteShoppingList, type ShoppingList,
 } from "../services/shoppingListService";
-import { Link } from "react-router-dom";
 import ConfirmOverlay from "../components/ConfirmOverlay";
-import emptyIcon from "../assets/EmptyState.webp";
-import { useToast } from "../components/ToastContext";
+import { ListNameForm } from "../components/ListNameForm";
+import { useToast } from "../components/useToast";
 
-const HomePage = () => {
-  // Retrieves global state and sets up local state for managing list creation, inline editing, and deletion
+// Shows the user's saved lists and opens the add, rename, and delete flows.
+export default function HomePage() {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const { showToast } = useToast();
-  const currentUser = useAppSelector((state) => state.auth.currentUser);
+  const user = useAppSelector((state) => state.auth.currentUser);
   const lists = useAppSelector((state) => state.shoppingLists.lists);
+  const userId = user?.id;
 
-  const [newListName, setNewListName] = useState("");
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editingName, setEditingName] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [loadState, setLoadState] = useState<"loading" | "ready" | "error">("loading");
+  const [attempt, setAttempt] = useState(0);
+  const [form, setForm] = useState<"new" | ShoppingList | null>(null);
+  const [removing, setRemoving] = useState<ShoppingList | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
-  // Fetches lists on mount, instantly displaying cached data for perceived performance while fetching fresh data in the background
+  // Refresh the user's Redux lists from JSON Server when the dashboard opens.
   useEffect(() => {
-    if (!currentUser) return;
-
-    // Clear data from a previous user, then display this user's cached data immediately.
-    dispatch(setLists([]));
-    const cachedLists = getCachedShoppingLists(currentUser.id);
-    if (cachedLists.length > 0) dispatch(setLists(cachedLists));
-
-    let cancelled = false;
-    setIsLoading(cachedLists.length === 0);
-
-    getShoppingLists(currentUser.id)
-      .then((data) => {
-        if (!cancelled) dispatch(setLists(data));
+    if (!userId) return;
+    let active = true;
+    getShoppingLists(userId)
+      .then((records) => {
+        if (!active) return;
+        dispatch(setLists(records));
+        setLoadState("ready");
       })
-      .catch((error) => {
-        console.error("Failed to load shopping lists", error);
-        showToast("Failed to load your shopping lists. Please try again.", "error");
-      })
-      .finally(() => {
-        if (!cancelled) setIsLoading(false);
-      });
+      .catch(() => { if (active) setLoadState("error"); });
+    return () => { active = false; };
+  }, [userId, attempt, dispatch]);
 
-    return () => {
-      cancelled = true;
-    };
-  }, [currentUser, dispatch]);
-
-  // Validates the input, sends the new list to the server, and updates the Redux store upon success
-  const handleCreateList = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!newListName.trim()) {
-      showToast("Please enter a list name before adding a list.", "error");
-      return;
+  // Updates Redux after a successful save and takes a new list straight to its items.
+  async function handleSave(name: string) {
+    if (!userId || !form) return;
+    if (form === "new") {
+      const list = await createShoppingList({ name, userId, dateAdded: new Date().toISOString() });
+      dispatch(addList(list));
+      showToast("List created.");
+      navigate(`/lists/${list.id}`);
+    } else {
+      dispatch(updateList(await renameShoppingList(form.id, name)));
+      showToast("List renamed.");
     }
+    setForm(null);
+  }
 
-    if (!currentUser) {
-      showToast("Please log in before creating a shopping list.", "error");
-      return;
-    }
-
+  // Deletes the confirmed list and only removes its card when the server succeeds.
+  async function handleDelete() {
+    if (!removing || deleting) return;
+    setDeleting(true);
     try {
-      const newList = await createShopppingList({
-        name: newListName,
-        userId: currentUser.id,
-        dateAdded: new Date().toISOString(),
-      });
-
-      dispatch(addList(newList));
-      setNewListName("");
-      showToast("Shopping list added successfully!", "success");
-    } catch (error) {
-      console.error("Failed to create list", error);
-      showToast("Failed to add the shopping list. Please try again.", "error");
-    }
-  };
-
-  // Saves the renamed list to the server, updates Redux, and manually synchronizes the local storage cache
-  const handleUpdate = async (id: string) => {
-    if (!editingName.trim()) {
-      return;
-    }
-    try {
-      const updated = await updateShoppingList(id, {
-        name: editingName,
-      });
-
-      dispatch(updateList(updated));
-      setEditingId(null);
-      if (currentUser) {
-        const cached = getCachedShoppingLists(currentUser.id);
-        localStorage.setItem(
-          `shoppingLists:${currentUser.id}`,
-          JSON.stringify(
-            cached.map((item) => (item.id === id ? updated : item)),
-          ),
-        );
-      }
-      showToast("Shopping list updated successfully!", "success");
-    } catch (error) {
-      console.error("failed to update list", error);
-      showToast("Failed to update the shopping list. Please try again.", "error");
-    }
-  };
-
-  // Removes the selected list globally and from the cache, while tracking the loading state for the confirmation modal
-  const handleDelete = async () => {
-    if (!deleteId) return;
-
-    setIsDeleting(true);
-    try {
-      await deleteShoppingList(deleteId);
-      dispatch(deleteList(deleteId));
-      if (currentUser) {
-        const cached = getCachedShoppingLists(currentUser.id);
-        localStorage.setItem(
-          `shoppingLists:${currentUser.id}`,
-          JSON.stringify(cached.filter((item) => item.id !== deleteId)),
-        );
-      }
-      setDeleteId(null);
-      showToast("Shopping list deleted successfully!", "success");
-    } catch (error) {
-      console.error("Failed to delete list", error);
-      showToast("Failed to delete the shopping list. Please try again.", "error");
+      await deleteShoppingList(removing.id);
+      dispatch(deleteList(removing.id));
+      setRemoving(null);
+      showToast("List deleted.");
+    } catch {
+      setRemoving(null);
+      showToast("Couldn't delete this list. Please try again.", "error");
     } finally {
-      setIsDeleting(false);
+      setDeleting(false);
     }
-  };
-  
+  }
+
+  const orderedLists = lists.filter((list) => list.userId === userId)
+    .sort((a, b) => b.dateAdded.localeCompare(a.dateAdded));
+
   return (
-    <>
-      {/* Renders the main dashboard UI, automatically adjusting for loading, empty, and populated states */}
-      <main className="dashboard-container">
-        <div className="dashboard-header">
-          <h1>My Shopping Lists</h1>
-          <p>Welcome back, {currentUser?.name}!</p>
+    <main className="dashboard-container">
+      <header className="page-hero">
+        <div>
+          <p className="eyebrow">YOUR SHOPPING SPACE</p>
+          <h1>My lists</h1>
+          <p>Hi, {user?.name}. What are we shopping for today?</p>
         </div>
+        <button className="action-btn btn-primary" disabled={loadState !== "ready"} onClick={() => setForm("new")}>
+          <Plus size={18} /> New list
+        </button>
+      </header>
 
-        <form onSubmit={handleCreateList} className="add-list-form">
-          <label htmlFor="listName" className="input-label">
-            New List Name:
-          </label>
-          <input
-            id="listName"
-            type="text"
-            placeholder="New list name (e.g., Groceries)"
-            value={newListName}
-            onChange={(e) => setNewListName(e.target.value)}
-            className="auth-input"
-          />
-          <button type="submit" className="add-list-button">
-            Add List
+      <h2 className="section-title">Shopping lists {loadState === "ready" && <span>{orderedLists.length}</span>}</h2>
+      {loadState === "loading" && <p className="status-panel" role="status">Loading your lists…</p>}
+      {loadState === "error" && (
+        <div className="status-panel">
+          <p role="alert">Couldn't load your lists. Check your connection and try again.</p>
+          <button className="action-btn edit-btn" onClick={() => { setLoadState("loading"); setAttempt(attempt + 1); }}>
+            Try again
           </button>
-        </form>
-
-        <div className="lists-grid">
-          {isLoading ? (
-            <div className="emptyState-Cont">
-              <h2>Loading your lists...</h2>
-            </div>
-          ) : lists.length === 0 ? (
-            <div className="emptyState-Cont">
-              <div className="empty-Image-Cont">
-                <img src={emptyIcon} alt="No items found" />
-              </div>
-              <h1>No Lists yet, Add new list</h1>
-              <span></span>
-            </div>
-          ) : (
-            lists.map((list) => (
-              <div key={list.id} className="list-card">
-                {/* Dynamically toggles between an inline editing view and the standard read-only card view */}
-                {editingId === list.id ? (
-                  <div>
-                    <input
-                      type="text"
-                      value={editingName}
-                      onChange={(e) => setEditingName(e.target.value)}
-                      className="edit-input"
-                      autoFocus
-                    />
-                    <div className="card-actions">
-                      <button
-                        onClick={() => handleUpdate(list.id)}
-                        className="action-btn edit-btn"
-                      >
-                        Save
-                      </button>
-                      <button
-                        onClick={() => setEditingId(null)}
-                        className="action-btn delete-btn"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div>
-                    <h3>{list.name}</h3>
-                    <p className="list-card-date">
-                      Created: {new Date(list.dateAdded).toLocaleDateString()}
-                    </p>
-                    <div className="card-actions">
-                      <Link
-                        to={`/lists/${list.id}`}
-                        className="action-btn btn-primary"
-                      >
-                        View Items
-                      </Link>
-                      <button
-                        onClick={() => {
-                          setEditingId(list.id);
-                          setEditingName(list.name);
-                        }}
-                        className="action-btn edit-btn"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => setDeleteId(list.id)}
-                        className="action-btn delete-btn"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))
-          )}
         </div>
-      </main>
-
-      {/* Conditionally displays the reusable confirmation overlay when the user attempts to delete a list */}
-      {deleteId && (
-        <ConfirmOverlay
-          title="Delete shopping list?"
-          message="This action cannot be undone. The list and its saved data will be removed."
-          isLoading={isDeleting}
-          onConfirm={handleDelete}
-          onCancel={() => !isDeleting && setDeleteId(null)}
-        />
       )}
-    </>
-  );
-};
+      {loadState === "ready" && (orderedLists.length === 0 ? (
+        <section className="emptyState-Cont">
+          <span className="card-mark"><ListChecks aria-hidden="true" /></span>
+          <h3>Start with a list</h3>
+          <p>Give it a name, then add what you need.</p>
+          <button className="action-btn btn-primary" onClick={() => setForm("new")}>Create your first list</button>
+        </section>
+      ) : (
+        <div className="lists-grid">
+          {orderedLists.map((list) => (
+            <article key={list.id} className="list-card">
+              <span className="card-mark"><ListChecks size={22} aria-hidden="true" /></span>
+              <h3>{list.name}</h3>
+              <p className="list-card-date">Created {new Date(list.dateAdded).toLocaleDateString()}</p>
+              <div className="card-actions">
+                <Link to={`/lists/${list.id}`} className="action-btn btn-primary">Open <ArrowUpRight size={16} /></Link>
+                <button className="action-btn edit-btn" onClick={() => setForm(list)}>Rename</button>
+                <button className="action-btn delete-btn" onClick={() => setRemoving(list)}>Delete</button>
+              </div>
+            </article>
+          ))}
+        </div>
+      ))}
 
-export default HomePage;
+      {form && <ListNameForm initialName={form === "new" ? undefined : form.name} onSave={handleSave} onClose={() => setForm(null)} />}
+      {removing && <ConfirmOverlay title="Delete this list?" message={`“${removing.name}” and all its items will be deleted.`}
+        isLoading={deleting} onConfirm={handleDelete} onCancel={() => setRemoving(null)} />}
+    </main>
+  );
+}

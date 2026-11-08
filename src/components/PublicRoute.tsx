@@ -1,6 +1,7 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useAppSelector } from "../store/hooks";
 
+// Keeps signed-in users out of the login and registration pages.
 const PublicRoute = () => {
   // Retrieves the current user's authentication status from the Redux store
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);

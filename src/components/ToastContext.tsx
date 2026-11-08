@@ -1,59 +1,31 @@
-import { createContext, useCallback, useContext, useMemo, useState } from "react";
+import { useCallback, useState, type ReactNode } from "react";
 import Toast, { type ToastType } from "./Toast";
+import { ToastContext } from "./useToast";
 
-// Defines the structure for an active toast item in state and the context value exposed to consumers
-interface ToastItem {
-  id: number;
-  message: string;
-  type: ToastType;
-}
+type ToastItem = { id: number; message: string; type: ToastType };
+let nextId = 0;
 
-interface ToastContextValue {
-  showToast: (message: string, type?: ToastType) => void;
-}
-
-// Creates the Context object to share the toast functionality globally across the application
-const ToastContext = createContext<ToastContextValue | undefined>(undefined);
-
-export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
+// Keeps a single notification stack available to all WeShop pages.
+export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
 
-  // Functions to dynamically add a new toast with a unique ID, and to remove it by ID once dismissed
+  // Adds the action's result to the notification stack.
   const showToast = useCallback((message: string, type: ToastType = "success") => {
-    const id = Date.now() + Math.random();
+    const id = nextId++;
     setToasts((current) => [...current, { id, message, type }]);
   }, []);
 
-  const removeToast = useCallback((id: number) => {
+  // Removes an individual message when it times out or is dismissed.
+  const dismiss = useCallback((id: number) => {
     setToasts((current) => current.filter((toast) => toast.id !== id));
   }, []);
 
-  // Memoizes the context value to prevent unnecessary re-renders of child components
-  const value = useMemo(() => ({ showToast }), [showToast]);
-
   return (
-    <ToastContext.Provider value={value}>
+    <ToastContext.Provider value={{ showToast }}>
       {children}
-      {/* Renders a fixed container that maps over the current state to display all active toasts */}
-      <div className="toast-container" aria-live="polite" aria-atomic="false">
-        {toasts.map((toast) => (
-          <Toast
-            key={toast.id}
-            message={toast.message}
-            type={toast.type}
-            onClose={() => removeToast(toast.id)}
-          />
-        ))}
+      <div className="toast-container">
+        {toasts.map((toast) => <Toast key={toast.id} {...toast} onClose={dismiss} />)}
       </div>
     </ToastContext.Provider>
   );
-};
-
-// A custom hook to easily trigger toasts from any component, throwing an error if used outside the Provider
-export const useToast = () => {
-  const context = useContext(ToastContext);
-  if (!context) {
-    throw new Error("useToast must be used inside a ToastProvider");
-  }
-  return context;
-};
+}

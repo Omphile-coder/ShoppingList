@@ -1,271 +1,170 @@
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
+import { Link } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { getUserByEmail, updateUser } from "../services/authService";
+import { getUserByEmail, publicUser, updateUser } from "../services/authService";
 import { login } from "../features/auth/authSlice";
-import { encryptData } from "../utils/encryption";
-import { useToast } from "../components/ToastContext";
+import { encryptData, decryptData } from "../utils/encryption";
+import { PasswordInput } from "../components/PasswordInput";
+import { useToast } from "../components/useToast";
 
-export const ProfilePage = () => {
+// Opens the profile for the current Redux session.
+export function ProfilePage() {
+  const user = useAppSelector((state) => state.auth.currentUser);
+  return user ? <ProfileForm key={user.id} user={user} /> : null;
+}
+
+type Profile = ReturnType<typeof publicUser>;
+
+// Lets the user update their contact details or change their password.
+function ProfileForm({ user }: { user: Profile }) {
   const dispatch = useAppDispatch();
   const { showToast } = useToast();
-  
-  // Retrieves the logged-in user from Redux to pre-fill the profile fields
-  const currentUser = useAppSelector((state) => state.auth.currentUser);
-
-  // Manages the toggle state and form inputs for updating the user's personal details
-  const [isEditingInfo, setIsEditingInfo] = useState(false);
-  const [infoForm, setInfoForm] = useState({
-    name: currentUser?.name || "",
-    surname: currentUser?.surname || "",
-    email: currentUser?.email || "",
-    cellNumber: currentUser?.cellNumber || "",
-  });
-
-  // Manages the toggle state and form inputs for the password change feature
-  const [isEditingPassowrd, setIsEditingPassowrd] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [details, setDetails] = useState({ name: user.name, surname: user.surname, email: user.email, cellNumber: user.cellNumber ?? "" });
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [oldPassword, setOldPassword] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [confirmation, setConfirmation] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
-  if (!currentUser) return null;
-
-  // Validates email uniqueness before updating the user's details in the database and syncing the Redux store
-  const handleUpdateInfo = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    try {
-      const normalizedEmail = infoForm.email.trim().toLowerCase();
-
-      // Check if the user is trying to change their email to one that is already taken
-      if (normalizedEmail !== currentUser.email) {
-        const existing = await getUserByEmail(normalizedEmail);
-
-        if (existing) {
-          showToast("That email is already in use by another account.", "error");
-          return;
-        }
-      }
-
-      const updatedUser = await updateUser(currentUser.id, {
-        ...infoForm,
-        email: normalizedEmail,
-      });
-
-      // Update the Redux state with the fresh data and close the editing form
-      dispatch(login(updatedUser));
-      showToast("Profile updated successfully!", "success");
-      setIsEditingInfo(false);
-    } catch (err) {
-      console.error(err);
-      showToast("Failed to update profile. Please try again.", "error");
-    }
-  };
-
-  // Verifies that the new passwords match, encrypts the input, and securely updates the database
-  const handleUpdatePassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (password !== confirmPassword) {
-      showToast("Passwords do not match.", "error");
+  // Validates a changed email, saves the profile, and refreshes the local session.
+  async function saveDetails(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const name = details.name.trim();
+    const surname = details.surname.trim();
+    const email = details.email.trim().toLowerCase();
+    const cellNumber = details.cellNumber.trim();
+    if (!name || !surname || !cellNumber) {
+      setError("Enter your first name, surname, and cell number.");
       return;
     }
-
+    setSaving(true);
+    setError("");
     try {
-      const encryptedPassword = encryptData(password);
-
-      const updatedUser = await updateUser(currentUser.id, {
-        password: encryptedPassword,
-      });
-
-      // Securely strip the password from the payload before sending the updated user back to Redux
-      const { password: _, ...safeUser } = updatedUser;
-      dispatch(login(safeUser));
-
-      showToast("Password updated securely!", "success");
-      setIsEditingPassowrd(false);
-      setPassword("");
-      setConfirmPassword("");
-    } catch (err) {
-      console.error(err);
-      showToast("Failed to update password. Please try again.", "error");
+      if (email !== user.email && await getUserByEmail(email)) {
+        setError("That email is already in use.");
+        return;
+      }
+      dispatch(login(publicUser(await updateUser(user.id, { name, surname, email, cellNumber }))));
+      setEditing(false);
+      showToast("Profile saved.");
+    } catch {
+      setError("Couldn't save your profile. Please try again.");
+    } finally {
+      setSaving(false);
     }
-  };
+  }
+
+  // Clears the draft credentials whenever the password form closes.
+  function closePasswordForm() {
+    setOldPassword("");
+    setPassword("");
+    setConfirmation("");
+    setChangingPassword(false);
+    setError("");
+  }
+
+  // Verifies the old password before encrypting and saving the new one.
+  async function savePassword(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (password !== confirmation) {
+      setError("The new passwords don't match.");
+      return;
+    }
+    setSaving(true);
+    setError("");
+    try {
+      const account = await getUserByEmail(user.email);
+      if (!account?.password || decryptData(account.password) !== oldPassword) {
+        setError("The current password is incorrect.");
+        return;
+      }
+      await updateUser(user.id, { password: encryptData(password) });
+      closePasswordForm();
+      showToast("Password updated.");
+    } catch {
+      setError("Couldn't change your password. Please try again.");
+    } finally {
+      setSaving(false);
+    }
+  }
 
   return (
     <main className="dashboard-container">
-      <div className="dashboard-header">
-        <h1>My Profile</h1>
-      </div>
-
-      {/* SECTION 1: Personal Information */}
-      <div className="item-form-container">
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "16px",
-          }}
-        >
-          <h2>Personal Information</h2>
-          {!isEditingInfo && (
-            <button
-              onClick={() => setIsEditingInfo(true)}
-              className="action-btn edit-btn"
-            >
-              Edit Details
-            </button>
+      <Link to="/" className="back-link"><ArrowLeft size={16} /> My lists</Link>
+      <header className="page-hero">
+        <div><p className="eyebrow">YOUR ACCOUNT</p><h1>Profile</h1><p>Manage your WeShop details and password.</p></div>
+      </header>
+      <div className="profile-grid">
+        <section className="list-card">
+          <h2>Personal details</h2>
+          {editing ? (
+            <form className="auth-form" onSubmit={saveDetails}>
+              <fieldset disabled={saving}>
+                <label className="input-group">First name
+                  <input className="auth-input" value={details.name} onChange={(event) => setDetails({ ...details, name: event.target.value })} required />
+                </label>
+                <label className="input-group">Surname
+                  <input className="auth-input" value={details.surname} onChange={(event) => setDetails({ ...details, surname: event.target.value })} required />
+                </label>
+                <label className="input-group">Email address
+                  <input className="auth-input" type="email" value={details.email} onChange={(event) => setDetails({ ...details, email: event.target.value })} required />
+                </label>
+                <label className="input-group">Cell number
+                  <input className="auth-input" type="tel" value={details.cellNumber} onChange={(event) => setDetails({ ...details, cellNumber: event.target.value })} required />
+                </label>
+              </fieldset>
+              {error && <p role="alert" className="alert-error">{error}</p>}
+              <div className="card-actions">
+                <button className="action-btn btn-primary" disabled={saving}>{saving ? "Saving…" : "Save details"}</button>
+                <button type="button" className="action-btn edit-btn" disabled={saving} onClick={() => { setEditing(false); setError(""); }}>Cancel</button>
+              </div>
+            </form>
+          ) : (
+            <>
+              <dl className="profile-details">
+                <dt>Name</dt><dd>{user.name} {user.surname}</dd>
+                <dt>Email address</dt><dd>{user.email}</dd>
+                <dt>Cell number</dt><dd>{user.cellNumber || "Not added"}</dd>
+              </dl>
+              <button className="action-btn edit-btn" disabled={changingPassword} onClick={() => {
+                setDetails({ name: user.name, surname: user.surname, email: user.email, cellNumber: user.cellNumber ?? "" });
+                setEditing(true);
+              }}>Edit details</button>
+            </>
           )}
-        </div>
-
-        {/* Dynamically toggles between a read-only view of the user's info and an editable form */}
-        {!isEditingInfo ? (
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            <p>
-              <strong>Name:</strong> {currentUser.name}
-            </p>
-            <p>
-              <strong>Surname:</strong> {currentUser.surname}
-            </p>
-            <p>
-              <strong>Email:</strong> {currentUser.email}
-            </p>
-            <p>
-              <strong>Cell Number:</strong> {currentUser.cellNumber}
-            </p>
-          </div>
-        ) : (
-          <form onSubmit={handleUpdateInfo} className="auth-form">
-            <label htmlFor="profile-name" className="input-label">
-              Name:
-            </label>
-            <input
-              id="profile-name"
-              type="text"
-              value={infoForm.name}
-              onChange={(e) =>
-                setInfoForm({ ...infoForm, name: e.target.value })
-              }
-              className="auth-input"
-              required
-            />
-            <label htmlFor="profile-surname" className="input-label">
-              Surname:
-            </label>
-            <input
-              id="profile-surname"
-              type="text"
-              value={infoForm.surname}
-              onChange={(e) =>
-                setInfoForm({ ...infoForm, surname: e.target.value })
-              }
-              className="auth-input"
-              required
-            />
-            <label htmlFor="profile-email" className="input-label">
-              Email:
-            </label>
-            <input
-              id="profile-email"
-              type="email"
-              value={infoForm.email}
-              onChange={(e) =>
-                setInfoForm({ ...infoForm, email: e.target.value })
-              }
-              className="auth-input"
-              required
-            />
-            <label htmlFor="profile-cell-number" className="input-label">
-              Cell Number:
-            </label>
-            <input
-              id="profile-cell-number"
-              type="tel"
-              value={infoForm.cellNumber}
-              onChange={(e) =>
-                setInfoForm({ ...infoForm, cellNumber: e.target.value })
-              }
-              className="auth-input"
-              required
-            />
-            <div className="card-actions">
-              <button type="submit" className="action-btn btn-primary">
-                Save Changes
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsEditingInfo(false)}
-                className="action-btn delete-btn"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
-        )}
-      </div>
-
-      {/* SECTION 2: Security & Credentials */}
-      <div className="item-form-container">
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "16px",
-          }}
-        >
-          <h2>Login Credentials</h2>
-          {!isEditingPassowrd && (
-            <button
-              onClick={() => setIsEditingPassowrd(true)}
-              className="action-btn edit-btn"
-            >
-              Change Password
-            </button>
+        </section>
+        <section className="list-card">
+          <h2>Password</h2>
+          {changingPassword ? (
+            <form className="auth-form" onSubmit={savePassword}>
+              <fieldset disabled={saving}>
+                <div className="input-group"><label htmlFor="old-password">Current password</label>
+                  <PasswordInput id="old-password" autoComplete="current-password" value={oldPassword} onChange={(event) => setOldPassword(event.target.value)} required />
+                </div>
+                <div className="input-group"><label htmlFor="new-password">New password</label>
+                  <PasswordInput id="new-password" autoComplete="new-password" minLength={8} value={password} onChange={(event) => setPassword(event.target.value)} required />
+                </div>
+                <div className="input-group"><label htmlFor="confirm-password">Confirm new password</label>
+                  <PasswordInput id="confirm-password" autoComplete="new-password" minLength={8} value={confirmation} onChange={(event) => setConfirmation(event.target.value)} required />
+                </div>
+              </fieldset>
+              {error && <p role="alert" className="alert-error">{error}</p>}
+              <div className="card-actions">
+                <button className="action-btn btn-primary" disabled={saving}>{saving ? "Saving…" : "Save password"}</button>
+                <button type="button" className="action-btn edit-btn" disabled={saving} onClick={closePasswordForm}>Cancel</button>
+              </div>
+            </form>
+          ) : (
+            <>
+              <p className="muted">Use at least 8 characters for your new password.</p>
+              <button className="action-btn edit-btn" disabled={editing} onClick={() => setChangingPassword(true)}>Change password</button>
+            </>
           )}
-        </div>
-
-        {/* Renders the password change form with strict minimum length requirements */}
-        {isEditingPassowrd && (
-          <form onSubmit={handleUpdatePassword} className="auth-form">
-            <label htmlFor="new-password" className="input-label">
-              New Password:
-            </label>
-            <input
-              id="new-password"
-              type="password"
-              minLength={8}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="auth-input"
-              required
-            />
-            <label htmlFor="confirm-password" className="input-label">
-              Confirm New Password:
-            </label>
-            <input
-              id="confirm-password"
-              type="password"
-              minLength={8}
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="auth-input"
-              required
-            />
-            <div className="card-actions">
-              <button type="submit" className="action-btn btn-primary">
-                Update Password
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsEditingPassowrd(false)}
-                className="action-btn delete-btn"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
-        )}
+        </section>
       </div>
     </main>
   );
-};
+}

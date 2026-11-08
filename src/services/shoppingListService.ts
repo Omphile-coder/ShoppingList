@@ -1,6 +1,6 @@
 import api from "./api";
+import { deleteShoppingItem, getShoppingItems } from "./shoppingItemService";
 
-// Defines the structure of a shopping list, linking it directly to the specific user who created it
 export interface ShoppingList {
   id: string;
   userId: string;
@@ -8,67 +8,38 @@ export interface ShoppingList {
   dateAdded: string;
 }
 
-// Utility functions to manage local storage caching, allowing the app to display lists instantly on page load
-const cacheKey = (userId: string) => `shoppingLists:${userId}`;
+// Loads the lists owned by the signed-in user for the dashboard.
+export async function getShoppingLists(userId: string) {
+  const response = await api.get<ShoppingList[]>("/shoppingLists", { params: { userId } });
+  return response.data;
+}
 
-export const getCachedShoppingLists = (userId: string): ShoppingList[] => {
-  try {
-    return JSON.parse(localStorage.getItem(cacheKey(userId)) || "[]");
-  } catch {
-    return [];
-  }
-};
-
-const saveCachedShoppingLists = (userId: string, lists: ShoppingList[]) => {
-  localStorage.setItem(cacheKey(userId), JSON.stringify(lists));
-};
-
-// Fetches the user's latest shopping lists from the backend and synchronizes the local storage cache
-export const getShoppingLists = async (userId: string) => {
-  const response = await api.get<ShoppingList[]>("/shoppingLists", {
-    params: { userId },
+// Loads a single list on direct navigation or refresh.
+export async function getShoppingList(id: string) {
+  const response = await api.get<ShoppingList>(`/shoppingLists/${id}`, {
+    validateStatus: (status) => status === 200 || status === 404,
   });
-  saveCachedShoppingLists(userId, response.data);
+  return response.status === 404 ? null : response.data;
+}
+
+// Creates the named list before the dashboard opens its detail page.
+export async function createShoppingList(list: Omit<ShoppingList, "id">) {
+  const response = await api.post<ShoppingList>("/shoppingLists", list);
   return response.data;
-};
+}
 
-// Submits a newly created shopping list to the API and safely appends the response to the existing local cache
-export const createShoppingList = async (
-  listData: Omit<ShoppingList, "id">,
-) => {
-  const response = await api.post<ShoppingList>("/shoppingLists", listData);
-  const lists = getCachedShoppingLists(listData.userId);
-  saveCachedShoppingLists(listData.userId, [...lists, response.data]);
+// Saves a new name without changing the list's owner or items.
+export async function renameShoppingList(id: string, name: string) {
+  const response = await api.patch<ShoppingList>(`/shoppingLists/${id}`, { name });
   return response.data;
-};
+}
 
-// Sends partial updates (such as renaming the list) for a specific shopping list to the backend
-export const updateShoppingList = async (
-  id: string,
-  listData: Partial<ShoppingList>,
-): Promise<ShoppingList> => {
-  const response = await api.patch<ShoppingList>(`/shoppingLists/${id}`, listData);
-
-  if (listData.userId) {
-    const lists = getCachedShoppingLists(listData.userId);
-    const updatedLists = lists.map((list) =>
-      list.id === id ? { ...list, ...response.data } : list,
-    );
-    saveCachedShoppingLists(listData.userId, updatedLists);
+// Removes the items first because older records use listId, which JSON Server
+// does not recognize as the automatic relationship for the shoppingLists collection.
+export async function deleteShoppingList(id: string) {
+  const items = await getShoppingItems(id);
+  for (const item of items) {
+    await deleteShoppingItem(item.id);
   }
-
-  return response.data;
-};
-
-// Permanently removes a shopping list from the database using its unique ID
-export const deleteShoppingList = async (id: string, userId?: string) => {
   await api.delete(`/shoppingLists/${id}`);
-
-  if (userId) {
-    const lists = getCachedShoppingLists(userId);
-    saveCachedShoppingLists(
-      userId,
-      lists.filter((list) => list.id !== id),
-    );
-  }
-};
+}

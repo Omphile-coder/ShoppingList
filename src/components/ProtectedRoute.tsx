@@ -1,6 +1,7 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useAppSelector } from "../store/hooks";
 
+// Redirects signed-out users before a private page renders.
 export const ProtectedRoute = () => {
   // Retrieves the current user's authentication status from the Redux store
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);

@@ -16,7 +16,18 @@ export interface User {
   name: string;
   surname: string;
   cellNumber?: string;
+  cellnumber?: string;
   password?: string;
+}
+
+export type PublicUser = Omit<User, "password" | "cellnumber">;
+
+// Keeps credentials out of Redux and normalizes the cell number from older records.
+export function publicUser(user: User): PublicUser {
+  return {
+    id: user.id, email: user.email, name: user.name, surname: user.surname,
+    cellNumber: user.cellNumber ?? user.cellnumber,
+  };
 }
 
 // Secures the user's password and normalizes their email address before creating a new account via the API
@@ -32,7 +43,6 @@ export const registerUser = async (userData: RegisterData) => {
 
   return response.data;
 };
-
 
 // Queries the database to find an existing user by their email address, returning the match or null if not found
 export const getUserByEmail = async (email: string) => {
