@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowLeft, Plus, Share2 } from "lucide-react";
+import { ArrowLeft, Image, Plus, Share2, SquarePen, Trash2 } from "lucide-react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { addItem, deleteItem, setItems, updateItem } from "../features/shoppingLists/shoppingItemSlice";
@@ -162,22 +162,32 @@ function ListView({ listId }: { listId: string }) {
           </div>
 
           {visibleItems.length ? (
-            <div className="lists-grid">
+            <div className="item-list">
               {visibleItems.map((item) => (
-                <article className="list-card" key={item.id}>
-                  {item.image && <img className="item-card-image" src={item.image} alt="" loading="lazy" />}
-                  <p className="eyebrow">{item.category}</p>
-                  <h2 className={item.completed ? "item-title is-complete" : "item-title"}>{item.name}</h2>
-                  <p className="list-card-date">Quantity: {item.quantity}</p>
-                  {item.notes && <p className="item-notes">{item.notes}</p>}
-                  <label className="check-item">
-                    <input type="checkbox" checked={Boolean(item.completed)} disabled={Boolean(togglingId)}
-                      onChange={() => void handleToggle(item)} aria-label={`Checked off: ${item.name}`} />
-                    Checked off
-                  </label>
-                  <div className="card-actions">
-                    <button className="action-btn edit-btn" onClick={() => setForm(item)}>Edit</button>
-                    <button className="action-btn delete-btn" onClick={() => setRemoving(item)}>Delete</button>
+                <article className="item-row" key={item.id}>
+                  <input className="item-check" type="checkbox" checked={Boolean(item.completed)}
+                    disabled={Boolean(togglingId)} onChange={() => void handleToggle(item)}
+                    aria-label={`Checked off: ${item.name}`} />
+                  {item.image ? (
+                    <img className="item-thumbnail" src={item.image} alt="" loading="lazy" />
+                  ) : (
+                    <span className="item-thumbnail item-thumbnail-empty" aria-hidden="true"><Image size={18} /></span>
+                  )}
+                  <div className="item-row-copy">
+                    <h2 className={item.completed ? "item-title is-complete" : "item-title"}>{item.name}</h2>
+                    <p className="item-category">{item.category}</p>
+                    {item.notes && <p className="item-notes">{item.notes}</p>}
+                  </div>
+                  <div className="item-row-actions">
+                    <span className="item-quantity" aria-label={`Quantity: ${item.quantity}`}>x{item.quantity}</span>
+                    <button type="button" className="icon-button item-row-button" aria-label={`Edit ${item.name}`}
+                      title="Edit item" onClick={() => setForm(item)}>
+                      <SquarePen size={17} aria-hidden="true" />
+                    </button>
+                    <button type="button" className="icon-button item-row-button item-row-delete" aria-label={`Delete ${item.name}`}
+                      title="Delete item" onClick={() => setRemoving(item)}>
+                      <Trash2 size={17} aria-hidden="true" />
+                    </button>
                   </div>
                 </article>
               ))}
