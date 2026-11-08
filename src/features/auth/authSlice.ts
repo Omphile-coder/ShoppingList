@@ -1,53 +1,39 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { User } from "../../services/authService";
+import { publicUser, type PublicUser } from "../../services/authService";
 
-// Defines the shape of the authentication state, explicitly excluding the password for security
-interface AuthState {
-  isAuthenticated: boolean;
-  currentUser: Omit<User, "password"> | null;
-}
+const sessionKey = "shoppingListUser";
 
-// Safely attempts to retrieve the persisted user session from local storage to maintain login state across page reloads
-const getStoredUser = (): Omit<User, "password"> | null => {
-  if (typeof window === "undefined") return null;
-
+// Reads the saved profile on refresh and strips any credential left by an older version.
+function readSession(): PublicUser | null {
   try {
-    const stored = localStorage.getItem("shoppingListUser");
-    return stored ? JSON.parse(stored) : null;
+    const stored = JSON.parse(localStorage.getItem(sessionKey) ?? "null");
+    if (!stored || typeof stored.id !== "string" || typeof stored.email !== "string") return null;
+    const profile = publicUser(stored);
+    localStorage.setItem(sessionKey, JSON.stringify(profile));
+    return profile;
   } catch {
     return null;
   }
-};
+}
 
-const storedUser = getStoredUser();
+const storedUser = readSession();
+const initialState = { isAuthenticated: Boolean(storedUser), currentUser: storedUser as PublicUser | null };
 
-const initialState: AuthState = {
-  isAuthenticated: Boolean(storedUser),
-  currentUser: storedUser,
-};
-
-// Creates the Redux slice for authentication, managing both memory state and local storage synchronization
 const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    // Updates the state with the user details and saves them to local storage upon successful login
-    login: (state, action: PayloadAction<Omit<User, "password">>) => {
+    // Updates the Redux session and persists only the fields used by the app.
+    login(state, action: PayloadAction<PublicUser>) {
       state.isAuthenticated = true;
-      state.currentUser = action.payload;
-
-      if (typeof window !== "undefined") {
-        localStorage.setItem("shoppingListUser", JSON.stringify(action.payload));
-      }
+      state.currentUser = publicUser(action.payload);
+      localStorage.setItem(sessionKey, JSON.stringify(state.currentUser));
     },
-    // Clears the user from both Redux state and local storage when logging out
-    logout: (state) => {
+    // Removes the saved session and disables protected routes.
+    logout(state) {
       state.isAuthenticated = false;
       state.currentUser = null;
-
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("shoppingListUser");
-      }
+      localStorage.removeItem(sessionKey);
     },
   },
 });

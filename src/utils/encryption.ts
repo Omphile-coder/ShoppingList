@@ -1,13 +1,19 @@
-
 import CryptoJS from "crypto-js";
 
-const SECRET_KEY = "shopping-list-secret-key";
+// Keep the existing key for compatibility with accounts created before WeShop.
+// This browser-side key is for the course demo; it cannot protect production credentials.
+const secretKey = "shopping-list-secret-key";
 
-export const encryptData = (data: string): string => { 
-    return CryptoJS.AES.encrypt(data, SECRET_KEY).toString();
+// Encrypts a password before registration or a password change writes it to JSON Server.
+export function encryptData(data: string) {
+  return CryptoJS.AES.encrypt(data, secretKey).toString();
 }
 
-export const decryptData = (cipherText: string): string => {
-    const bytes = CryptoJS.AES.decrypt(cipherText, SECRET_KEY);
-    return bytes.toString(CryptoJS.enc.Utf8);
- }
+// Decrypts a stored password for comparison during sign-in, as required by the task.
+export function decryptData(cipherText: string) {
+  try {
+    return CryptoJS.AES.decrypt(cipherText, secretKey).toString(CryptoJS.enc.Utf8);
+  } catch {
+    return "";
+  }
+}
